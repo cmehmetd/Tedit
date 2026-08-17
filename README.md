@@ -6,18 +6,6 @@
 
 ---
 
-## 📋 İçindekiler
-
-- [Proje Hakkında](#-proje-hakkında)
-- [Özellikler](#-özellikler)
-- [Nasıl Kullanılır](#-kurulum--kullanım)
-- [Arayüz Mimarisi](#-arayüz-mimarisi)
-- [Araçlar & Kısayollar](#-araçlar--kısayollar)
-- [Dosya Yapısı](#-dosya-yapısı)
-- [Teknik Detaylar](#-teknik-detaylar)
-
----
-
 ## 🎯 Proje Hakkında
 
 **Tedit**, YouTube içerik üreticileri için tasarlanmış, tarayıcı tabanlı bir thumbnail editörüdür. Herhangi bir kurulum veya sunucu gerektirmez — doğrudan `index.html` dosyasını açarak kullanmaya başlayabilirsiniz.

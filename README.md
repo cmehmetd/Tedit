@@ -10,7 +10,7 @@
 
 - [Proje Hakkında](#-proje-hakkında)
 - [Özellikler](#-özellikler)
-- [Kurulum & Kullanım](#-kurulum--kullanım)
+- [Nasıl Kullanılır](#-kurulum--kullanım)
 - [Arayüz Mimarisi](#-arayüz-mimarisi)
 - [Araçlar & Kısayollar](#-araçlar--kısayollar)
 - [Dosya Yapısı](#-dosya-yapısı)
@@ -84,18 +84,11 @@ Aşağıdaki şekilleri canvas'a ekleyebilirsiniz:
 
 ---
 
-## 🚀 Kurulum & Kullanım
+## 🚀 Nasıl Kullanılır
 
-Tedit **sıfır bağımlılıklı** bir projedir. Kurulum gerekmez.
+Aşağıdaki bağlantıya tıklayarak kullanmaya başlayabilirsiniz.
 
-```bash
-# Projeyi klonlayın veya indirin
-git clone https://github.com/kullanici/tedit.git
-
-# index.html dosyasını bir tarayıcıda açın
-start index.html   # Windows
-open index.html    # macOS
-```
+https://cmehmetd.github.io/Tedit/
 
 > **Not:** Google Fonts ve Material Symbols için internet bağlantısı gereklidir.
 

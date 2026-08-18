@@ -78,7 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const removeBgToleranceValue = document.getElementById('remove-bg-tolerance-value');
   const applyRemoveBg = document.getElementById('apply-remove-bg');
   const languageSelect = document.getElementById('language-select');
-  let translations = {};
+  const translationSets = {
+    tr: {"Arka Plan:":"Arka Plan:","İndir":"İndir","Özellikler":"Özellikler","Seçim Yok":"Seçim Yok","Katmanlar":"Katmanlar","Metin":"Metin","Şekil":"Şekil","Çizim":"Çizim","Görsel":"Görsel","Arkaplanı Kaldır":"Arkaplanı Kaldır","Uygula":"Uygula","Silinecek renk":"Silinecek renk","Tolerans:":"Tolerans:","Metin İçeriği":"Metin İçeriği","Yazı girin...":"Yazı girin...","Yazı Tipi (Font)":"Yazı Tipi (Font)","Yazı Boyutu":"Yazı Boyutu","Yazı Rengi":"Yazı Rengi","Kenarlık":"Kenarlık","Kenar Kalınlığı":"Kenar Kalınlığı","Thumbnail Gölge Efekti":"Thumbnail Gölge Efekti","Dolgu":"Dolgu","Dolgu Rengi":"Dolgu Rengi","Kenarlık Rengi":"Kenarlık Rengi","Köşe Yuvarlaklığı":"Köşe Yuvarlaklığı","Fırça Rengi":"Fırça Rengi","Fırça Kalınlığı":"Fırça Kalınlığı","Çizim Modunu Kapat":"Çizim Modunu Kapat","Döndürme Açısı":"Döndürme Açısı","Üste":"Üste","Alta":"Alta","Geri Al":"Geri Al","İleri Al":"İleri Al","Dikdörtgen":"Dikdörtgen","Daire":"Daire","Yıldız / Parlama":"Yıldız / Parlama","Ok İşareti":"Ok İşareti","Thumbnail Rozeti":"Thumbnail Rozeti","Katmanı":"Katmanı"},
+    en: {"Arka Plan:":"Background:","İndir":"Download","Özellikler":"Properties","Seçim Yok":"No Selection","Katmanlar":"Layers","Metin":"Text","Şekil":"Shape","Çizim":"Drawing","Görsel":"Image","Arkaplanı Kaldır":"Remove Background","Uygula":"Apply","Silinecek renk":"Color to remove","Tolerans:":"Tolerance:","Metin İçeriği":"Text Content","Yazı girin...":"Enter text...","Yazı Tipi (Font)":"Font Family","Yazı Boyutu":"Font Size","Yazı Rengi":"Text Color","Kenarlık":"Stroke","Kenar Kalınlığı":"Stroke Width","Thumbnail Gölge Efekti":"Thumbnail Shadow Effect","Dolgu":"Fill","Dolgu Rengi":"Fill Color","Kenarlık Rengi":"Stroke Color","Köşe Yuvarlaklığı":"Corner Radius","Fırça Rengi":"Brush Color","Fırça Kalınlığı":"Brush Size","Çizim Modunu Kapat":"Finish Drawing","Döndürme Açısı":"Rotation Angle","Üste":"Up","Alta":"Down","Geri Al":"Undo","İleri Al":"Redo","Dikdörtgen":"Rectangle","Daire":"Circle","Yıldız / Parlama":"Star / Burst","Ok İşareti":"Arrow","Thumbnail Rozeti":"Thumbnail Badge","Düzenlemek için canvas üzerinden bir metin, şekil veya katman seçin.":"Select text, a shape, or a layer on the canvas to edit it.","Çizim Modu Devrede":"Drawing Mode Active","Opaklık":"Opacity","Bir Üste Taşı":"Move Up","Bir Alta Taşı":"Move Down","Çoğalt":"Duplicate","Katmanı Sil":"Delete Layer","Henüz katman yok":"No layers yet","Metin, şekil veya çizim ekleyerek başlayın.":"Add text, shapes, or drawings to get started.","Canvas Arka Plan Rengi":"Canvas Background Color","Format Seçenekleri":"Format Options","PNG (Yüksek Kalite)":"PNG (High Quality)","JPG (Küçük Boyut)":"JPG (Small File)","Yazı Ekle":"Add Text","Şekil Ekle":"Add Shape","Serbest Çizim":"Freehand Drawing","Görsel veya Arka Plan Yükle":"Upload Image or Background","Seçili görselin arka planını kaldır":"Remove the selected image background","Dil seçin":"Select language","Gizle":"Hide","Göster":"Show","Katmanı":"Layer"}
+  };
+  let translations = translationSets.en;
   const originalText = new WeakMap();
   const originalAttributes = new Map();
 
@@ -114,19 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  async function loadLanguage(code) {
-    try {
-      const manifest = await fetch('locales/languages.json').then(r => r.json());
-      const language = manifest.find(item => item.code === code) || manifest[0];
-      translations = await fetch(`locales/${language.file}`).then(r => r.json());
-      languageSelect.innerHTML = manifest.map(item => `<option value="${item.code}">${item.name}</option>`).join('');
-      languageSelect.value = language.code;
-      localStorage.setItem('tedit-language', language.code);
-      translatePage();
-      updateUI();
-    } catch (error) {
-      console.warn('Dil dosyası yüklenemedi:', error);
-    }
+  function loadLanguage(code) {
+    const languageCode = translationSets[code] ? code : 'en';
+    translations = translationSets[languageCode];
+    languageSelect.value = languageCode;
+    localStorage.setItem('tedit-language', languageCode);
+    translatePage();
+    updateUI();
   }
 
   // Top Bar View Elements
@@ -1015,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', () => {
     exitDrawingMode();
     const newLayer = {
       id: generateId(),
-      name: 'Yazı ' + (state.layers.filter(l => l.type === 'text').length + 1),
+      name: t('Metin') + ' ' + (state.layers.filter(l => l.type === 'text').length + 1),
       type: 'text',
       text: 'YAZI BURAYA',
       fontFamily: 'Montserrat',
@@ -1041,11 +1039,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function addShapeLayer(shapeType) {
     exitDrawingMode();
     const shapeNames = {
-      rect: 'Dikdörtgen',
-      circle: 'Daire',
-      star: 'Yıldız',
-      arrow: 'Ok',
-      badge: 'Thumbnail Rozeti'
+      rect: t('Dikdörtgen'),
+      circle: t('Daire'),
+      star: t('Yıldız / Parlama'),
+      arrow: t('Ok İşareti'),
+      badge: t('Thumbnail Rozeti')
     };
 
     const newLayer = {
@@ -1086,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const newLayer = {
       id: generateId(),
-      name: fileName ? (fileName.length > 15 ? fileName.substring(0, 12) + '...' : fileName) : 'Görsel',
+      name: fileName ? (fileName.length > 15 ? fileName.substring(0, 12) + '...' : fileName) : t('Görsel'),
       type: 'image',
       _imgElement: img,
       x: 640,
@@ -1128,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const newLayer = {
         id: generateId(),
-        name: 'Çizim ' + (state.layers.filter(l => l.type === 'drawing').length + 1),
+        name: t('Çizim') + ' ' + (state.layers.filter(l => l.type === 'drawing').length + 1),
         type: 'drawing',
         points: normalizedPoints,
         strokeColor: state.drawingBrush.color,
@@ -1285,7 +1283,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (activeLayer.type === 'image') {
         propTypeBadge.textContent = t('Görsel');
       } else if (activeLayer.type === 'drawing') {
-        propTypeBadge.textContent = `${t('Çizim')} Katmanı`;
+        propTypeBadge.textContent = `${t('Çizim')} ${t('Katmanı')}`;
       }
     } else {
       propTypeBadge.textContent = t('Seçim Yok');
@@ -1320,6 +1318,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render layers in reverse order (top layer is on top of the list)
     [...state.layers].reverse().forEach(layer => {
+      let displayName = layer.name;
+      if (/^Yazı \d+$/.test(layer.name)) displayName = `${t('Metin')} ${layer.name.match(/\d+$/)[0]}`;
+      if (/^Çizim \d+$/.test(layer.name)) displayName = `${t('Çizim')} ${layer.name.match(/\d+$/)[0]}`;
+      if (layer.name === 'Görsel') displayName = t('Görsel');
       const item = document.createElement('div');
       item.className = `layer-item ${layer.id === state.selectedLayerId ? 'active' : ''}`;
       item.setAttribute('draggable', 'true');
@@ -1337,11 +1339,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="material-symbols-outlined">${iconMap[layer.type] || 'layers'}</span>
         </div>
         <div class="layer-info">
-          <span class="layer-name">${escapeHtml(layer.name)}</span>
-          <span class="layer-sub">${Math.round((layer.opacity !== undefined ? layer.opacity : 1) * 100)}% Opaklık</span>
+          <span class="layer-name">${escapeHtml(displayName)}</span>
+          <span class="layer-sub">${Math.round((layer.opacity !== undefined ? layer.opacity : 1) * 100)}% ${t('Opaklık')}</span>
         </div>
         <div class="layer-quick-tools">
-          <button class="layer-tool-icon btn-vis" title="${layer.visible ? 'Gizle' : 'Göster'}">
+          <button class="layer-tool-icon btn-vis" title="${layer.visible ? t('Gizle') : t('Göster')}">
             <span class="material-symbols-outlined">${layer.visible ? 'visibility' : 'visibility_off'}</span>
           </button>
         </div>

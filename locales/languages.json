@@ -1,0 +1,6 @@
+[
+  {"code":"tr","name":"Türkçe","file":"tr.json"},
+  {"code":"en","name":"English","file":"en.json"},
+  {"code":"de","name":"Deutsch","file":"de.json"},
+  {"code":"zh","name":"中文","file":"zh.json"}
+]

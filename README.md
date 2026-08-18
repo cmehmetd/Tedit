@@ -1,198 +1,156 @@
-﻿# Tedit — YouTube Thumbnail Editörü
+# Tedit
 
-> **Saf HTML5 Canvas + Vanilla JS ile çalışan, sunucu gerektirmeyen modern YouTube thumbnail editörü.**
+> A client-side YouTube thumbnail editor built with the HTML5 Canvas API, vanilla JavaScript, and CSS.
 
-![Durum](https://img.shields.io/badge/Durum-Aktif-27B3FF?style=for-the-badge) ![Teknoloji](https://img.shields.io/badge/Teknoloji-Vanilla%20JS-F7DF1E?style=for-the-badge&logo=javascript)
+![Status](https://img.shields.io/badge/status-active-27B3FF?style=for-the-badge) ![Technology](https://img.shields.io/badge/technology-vanilla%20JS-F7DF1E?style=for-the-badge&logo=javascript)
 
----
+Tedit is a zero-build, browser-based visual editor for creating YouTube thumbnails. It runs entirely on the client, requires no server or npm dependencies, and exports artwork at the YouTube-standard **1280 × 720** resolution.
 
-## 🎯 Proje Hakkında
+Live demo: [cmehmetd.github.io/Tedit](https://cmehmetd.github.io/Tedit/)
 
-**Tedit**, YouTube içerik üreticileri için tasarlanmış, tarayıcı tabanlı bir thumbnail editörüdür. Herhangi bir kurulum veya sunucu gerektirmez — doğrudan `index.html` dosyasını açarak kullanmaya başlayabilirsiniz.
+## Features
 
-Proje; **1280 × 720** piksel (YouTube standart boyutu) canvas üzerinde katman tabanlı bir düzenleme deneyimi sunar. Tüm işlemler istemci tarafında çalışır, verileriniz hiçbir zaman dışarıya aktarılmaz.
+- Text layers with selectable fonts, size, color, stroke, and shadow.
+- Rectangle, circle, starburst, arrow, and badge shape layers.
+- Freehand drawing with configurable brush color and size.
+- Local image uploads through `FileReader` and image layers.
+- Layer ordering, visibility, duplication, deletion, opacity, and drag-and-drop reordering.
+- Selection handles for moving, resizing, and rotating layers.
+- Center snapping with visual alignment guides.
+- Undo/redo history with a 30-step limit.
+- Viewport zoom and spacebar-based panning.
+- PNG and JPG export at the fixed logical canvas size.
 
----
+## Getting started
 
-## ✨ Özellikler
+No installation or build step is required.
 
-### 🖋️ Metin Aracı
-- Özelleştirilebilir **yazı tipi** (Anton, Bangers, Montserrat, Poppins, Inter, Impact, Permanent Marker)
-- Yazı boyutu: **16 – 250 px** (slider + sayısal giriş)
-- **Yazı rengi** ve **kenarlık (stroke) rengi** bağımsız olarak ayarlanabilir
-- **Kenarlık kalınlığı**: 0 – 30 px
-- **Thumbnail Gölge Efekti** (toggle ile etkinleştirilebilir)
+1. Clone or download the repository.
+2. Open `index.html` in a modern browser.
+3. Alternatively, serve the directory with any static HTTP server and open the local URL.
 
-### 🔷 Şekil Aracı
+Google Fonts and Material Symbols are loaded remotely, so the complete UI requires an internet connection. The editor itself does not send project data to a backend.
 
-Aşağıdaki şekilleri canvas'a ekleyebilirsiniz:
+## Repository structure
 
-| Şekil | Açıklama |
-|---|---|
-| Dikdörtgen | Klasik rectangle, yuvarlak köşe desteğiyle |
-| Daire | Tam çember / oval |
-| Yıldız / Parlama | Dikkat çeken starburst efekti |
-| Ok İşareti | Yön oku |
-| Thumbnail Rozeti | Hazır rozet/etiket şekli |
-
-- **Dolgu rengi** ve açma/kapama toggle'ı
-- **Kenarlık rengi** ve kalınlığı
-- **Köşe yuvarlaklığı**: 0 – 60 px
-
-### ✏️ Serbest Çizim
-- Özelleştirilebilir **fırça rengi** ve **kalınlığı** (2 – 60 px)
-- Çizim modu bittiğinde katman olarak eklenir
-
-### 🖼️ Görsel Yükleme
-- `image/*` destekli yerel dosya yükleme
-- Yüklenen görsel katman olarak eklenir ve diğer katmanlarla birlikte yönetilir
-
-### 🔄 Undo / Redo
-- **30 adıma** kadar geri alma/ileri alma geçmişi
-- `Ctrl+Z` / `Ctrl+Y` kısayolları
-
-### 📐 Magnetik Hizalama (Snap)
-- Katman ortalandığında yatay/dikey **mavi kılavuz çizgiler** belirir
-- İkisi aynı anda aktifken canvas merkezinde **artı (+) işareti** ve **kırmızı nokta** gösterilir
-
-### 🗂️ Katman Yönetimi
-- Sürükle-bırak ile **katman sırası değiştirme**
-- **Opaklık (0 – 100%)** kontrolü
-- Katmanı **üste / alta taşı**, **çoğalt**, **sil**
-
-### 🔍 Yakınlaştırma & Kaydırma
-- `Ctrl + Mouse Scroll` ile zoom in/out
-- `Space` tuşu basılıyken sürükleyerek **pan (kaydırma)**
-- Zoom sıfırlama butonu
-
-### 💾 Dışa Aktarma
-- **PNG** (yüksek kalite, şeffaflık destekli)
-- **JPG** (küçük dosya boyutu)
-- Çıktı her zaman **1280 × 720 px** gerçek canvas boyutunda
-
----
-
-## 🚀 Nasıl Kullanılır
-
-Aşağıdaki bağlantıya tıklayarak kullanmaya başlayabilirsiniz.
-
-https://cmehmetd.github.io/Tedit/
-
-> **Not:** Google Fonts ve Material Symbols için internet bağlantısı gereklidir.
-
----
-
-## 🏗️ Arayüz Mimarisi
-
-```
-┌─────────────────────────────────────────────────────┐
-│           Üst Araç Çubuğu (Floating Panels)          │
-│  [Tedit Logo] [Zoom | Arka Plan] [Undo/Redo | İndir] │
-├──────────────┬──────────────────────┬────────────────┤
-│  Sol Panel   │                      │   Sağ Panel    │
-│ (Özellikler) │    Canvas Alanı      │  (Katmanlar)   │
-│              │    1280 × 720        │                │
-│  • Metin     │                      │  • Katman 1    │
-│  • Şekil     │  [interactive-canvas]│  • Katman 2    │
-│  • Çizim     │  [main-canvas]       │  • ...         │
-│  • Transform │                      │                │
-├──────────────┴──────────────────────┴────────────────┤
-│          Alt Araç Çubuğu (Floating Bar)              │
-│      [Metin] [Şekil] [Çizim] | [Görsel Yükle]       │
-└──────────────────────────────────────────────────────┘
-```
-
----
-
-## ⌨️ Araçlar & Kısayollar
-
-| Kısayol | İşlev |
-|---|---|
-| `Ctrl + Z` | Geri al (Undo) |
-| `Ctrl + Y` | İleri al (Redo) |
-| `Ctrl + Scroll` | Yakınlaştır / Uzaklaştır |
-| `Space + Sürükle` | Canvas'ı kaydır (Pan) |
-| `Delete` / `Backspace` | Seçili katmanı sil |
-| `Tıklama` | Katman seç |
-
----
-
-## 📁 Dosya Yapısı
-
-```
+```text
 Tedit/
-├── index.html     # Uygulama giriş noktası, tüm HTML yapısı
-├── style.css      # Dark theme UI stilleri (~1076 satır)
-├── app.js         # Canvas motoru, katman sistemi, olay yönetimi (~1779 satır)
-├── README.md      # Bu dosya
-└── AGENTS.md      # AI ajan geliştirme rehberi
+├── index.html     # Application markup and panel layout
+├── style.css      # Theme, layout, controls, and responsive styles
+├── app.js         # Application state, canvas renderer, interactions, and export
+├── README.md      # Developer documentation
+├── AGENTS.md      # Repository guidance for AI-assisted development
+└── LICENSE        # Project license, when included in the checkout
 ```
 
----
+## Architecture
 
-## 🔧 Teknik Detaylar
+The application logic is contained in one `DOMContentLoaded` module in `app.js`; it intentionally does not expose application state or functions globally.
 
-### Canvas Mimarisi
-Uygulama **çift canvas** katmanı kullanır:
+### Rendering model
 
-| Canvas | ID | Amaç |
+Tedit uses two canvases with a shared logical coordinate system:
+
+| Canvas | ID | Responsibility |
 |---|---|---|
-| Ana Canvas | `#main-canvas` | Gerçek çıktı (1280×720), tüm katmanların render edildiği yer |
-| Etkileşim Canvas | `#interactive-canvas` | Seçim tutamaçları, hizalama çizgileri, canlı çizim önizlemesi |
+| Output canvas | `#main-canvas` | Renders the final 1280 × 720 composition used for export |
+| Interaction canvas | `#interactive-canvas` | Renders selection handles, snap guides, and drawing previews |
 
-### State Yönetimi
-Tek bir `state` nesnesi üzerinden yönetilir:
+The render pipeline clears the output canvas, paints the background, renders layers from bottom to top, and then draws interaction-only overlays. Viewport zoom and pan affect the displayed wrapper through CSS transforms; layer coordinates remain in logical canvas space.
+
+### Application state
+
+The central `state` object contains the document, selection, history, and viewport state:
 
 ```js
-state = {
-  canvasWidth: 1280, canvasHeight: 720,
+{
+  canvasWidth: 1280,
+  canvasHeight: 720,
   backgroundColor: '#FFFFFF',
-  layers: [],              // tüm katman verileri
-  selectedLayerId: null,   // aktif katman
-  history: [],             // undo/redo geçmişi (max 30)
+  layers: [],
+  selectedLayerId: null,
+  history: [],
   historyIndex: -1,
-  userZoom: 1.0,           // viewport zoom
-  panX: 0, panY: 0,        // viewport pan
-  activeTool: 'select',    // 'select' | 'drawing'
+  userZoom: 1,
+  panX: 0,
+  panY: 0,
+  activeTool: 'select',
   drawingBrush: { color, size, points }
 }
 ```
 
-### Render Döngüsü
-1. Ana canvas temizlenir
-2. Arka plan rengi çizilir
-3. Katmanlar **alttan üste** sırayla render edilir
-4. Etkileşim canvas'ına seçim tutamaçları / snap kılavuzları / canlı çizim eklenir
-5. Katmanlar paneli DOM güncellenir
+Layer order is significant: `state.layers[0]` is the bottom-most layer. Every visual mutation should follow the project convention:
 
-### Desteklenen Katman Türleri
+```js
+saveHistoryState();
+render();
+updateUI(); // when the properties or layer panels are affected
+```
 
-| Tür | `type` | Açıklama |
-|---|---|---|
-| Metin | `text` | Font, boyut, renk, stroke, gölge |
-| Dikdörtgen | `rect` | Dolgu, kenarlık, köşe radius |
-| Daire | `circle` | Dolgu, kenarlık |
-| Yıldız | `star` | Starburst efekti |
-| Ok | `arrow` | Yönlü ok şekli |
-| Rozet | `badge` | Thumbnail etiketi |
-| Görsel | `image` | HTMLImageElement referansı |
-| Serbest Çizim | `freehand` | Nokta dizisi (path tabanlı) |
+### Layer model
 
----
+All layers share `id`, `type`, `x`, `y`, `width`, `height`, `rotation`, `opacity`, `visible`, and `label` fields. Type-specific data includes:
 
-## 🎨 Tema & CSS Değişkenleri
+| Type | Additional data |
+|---|---|
+| `text` | `text`, `fontFamily`, `fontSize`, `color`, `strokeColor`, `strokeWidth`, `shadow` |
+| `rect` | `fillEnabled`, `fillColor`, `strokeColor`, `strokeWidth`, `radius` |
+| `circle`, `star`, `arrow`, `badge` | `fillEnabled`, `fillColor`, `strokeColor`, `strokeWidth` |
+| `image` | `_imgElement` for rendering and `_imgSrc` for history snapshots |
+| `freehand` | `points`, `color`, and `size` |
 
-| Değişken | Değer | Kullanım |
-|---|---|---|
-| `--bg-main` | `#101010` | Ana uygulama arka planı |
-| `--bg-panel` | `rgba(24,24,28,0.92)` | Floating panel arka planı (blur) |
-| `--accent-color` | `#27B3FF` | Vurgu rengi, odak, aktif element |
-| `--brand-red` | `#FF2B2B` | Logo "T" harfi, fırça varsayılanı |
-| `--danger-color` | `#FF453A` | Silme / hata durumları |
-| `--panel-width` | `280px` | Sol ve sağ panel genişliği |
+When adding a new layer type, update the layer factory, `renderLayer()`, the layer-panel type metadata, and the properties/event bindings as needed.
 
----
+## Coordinate systems
 
-## 📄 Lisans
+Layer data uses the fixed logical canvas space (`1280 × 720`). Pointer input is converted from the displayed canvas rectangle into logical coordinates:
 
-Bu proje GNU General Public License v3.0 (GPLv3) ile lisanslanmıştır. Ayrıntılar için LICENSE dosyasına göz atabilirsiniz.
+```js
+const rect = interactiveCanvas.getBoundingClientRect();
+const scaleX = state.canvasWidth / rect.width;
+const scaleY = state.canvasHeight / rect.height;
+const canvasX = (event.clientX - rect.left) * scaleX;
+const canvasY = (event.clientY - rect.top) * scaleY;
+```
+
+Keep canvas dimensions configurable through `state.canvasWidth` and `state.canvasHeight`; do not introduce new hard-coded canvas dimensions.
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl + Z` | Undo |
+| `Ctrl + Y` | Redo |
+| `Ctrl + Mouse Wheel` | Zoom in or out |
+| `Space + Drag` | Pan the viewport |
+| `Delete` / `Backspace` | Delete the selected layer |
+| Click | Select a layer |
+
+## Development notes
+
+- There are currently no automated tests or runtime dependencies.
+- Use the browser console and manual interaction flows when validating changes.
+- Preserve image history behavior: snapshots serialize `_imgSrc`, not the `HTMLImageElement` reference.
+- Keep visual constants in CSS custom properties defined in `:root`.
+- The application has no persistent storage; refreshing the page resets the document.
+
+Recommended manual regression checks:
+
+1. Add and edit text, shapes, freehand paths, and images.
+2. Move, resize, rotate, reorder, duplicate, hide, and delete layers.
+3. Verify undo/redo across more than five changes.
+4. Check center snapping, zoom, pan, and both export formats.
+5. Confirm exported files are 1280 × 720 and that transparent PNG output behaves as expected.
+
+## Known limitations and extension points
+
+- No local project persistence; `localStorage` or IndexedDB could be added.
+- Font choices are currently a fixed list; custom font loading is not implemented.
+- History is limited to 30 states.
+- Multi-selection and group transforms are not supported.
+- Snap guides currently focus on canvas center alignment.
+- Touch interaction and mobile editing can be improved.
+
+## License
+
+Tedit is licensed under the GNU General Public License v3.0 (GPLv3). See `LICENSE` for the full license text.

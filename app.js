@@ -77,11 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const removeBgTolerance = document.getElementById('remove-bg-tolerance');
   const removeBgToleranceValue = document.getElementById('remove-bg-tolerance-value');
   const applyRemoveBg = document.getElementById('apply-remove-bg');
-  const languageSelect = document.getElementById('language-select');
   const translationSets = {
-    tr: {"Arka Plan:":"Arka Plan:","İndir":"İndir","Özellikler":"Özellikler","Seçim Yok":"Seçim Yok","Katmanlar":"Katmanlar","Metin":"Metin","Şekil":"Şekil","Çizim":"Çizim","Görsel":"Görsel","Arkaplanı Kaldır":"Arkaplanı Kaldır","Uygula":"Uygula","Silinecek renk":"Silinecek renk","Tolerans:":"Tolerans:","Metin İçeriği":"Metin İçeriği","Yazı girin...":"Yazı girin...","Yazı Tipi (Font)":"Yazı Tipi (Font)","Yazı Boyutu":"Yazı Boyutu","Yazı Rengi":"Yazı Rengi","Kenarlık":"Kenarlık","Kenar Kalınlığı":"Kenar Kalınlığı","Thumbnail Gölge Efekti":"Thumbnail Gölge Efekti","Dolgu":"Dolgu","Dolgu Rengi":"Dolgu Rengi","Kenarlık Rengi":"Kenarlık Rengi","Köşe Yuvarlaklığı":"Köşe Yuvarlaklığı","Fırça Rengi":"Fırça Rengi","Fırça Kalınlığı":"Fırça Kalınlığı","Çizim Modunu Kapat":"Çizim Modunu Kapat","Döndürme Açısı":"Döndürme Açısı","Üste":"Üste","Alta":"Alta","Geri Al":"Geri Al","İleri Al":"İleri Al","Dikdörtgen":"Dikdörtgen","Daire":"Daire","Yıldız / Parlama":"Yıldız / Parlama","Ok İşareti":"Ok İşareti","Thumbnail Rozeti":"Thumbnail Rozeti","Katmanı":"Katmanı"},
     en: {"Arka Plan:":"Background:","İndir":"Download","Özellikler":"Properties","Seçim Yok":"No Selection","Katmanlar":"Layers","Metin":"Text","Şekil":"Shape","Çizim":"Drawing","Görsel":"Image","Arkaplanı Kaldır":"Remove Background","Uygula":"Apply","Silinecek renk":"Color to remove","Tolerans:":"Tolerance:","Metin İçeriği":"Text Content","Yazı girin...":"Enter text...","Yazı Tipi (Font)":"Font Family","Yazı Boyutu":"Font Size","Yazı Rengi":"Text Color","Kenarlık":"Stroke","Kenar Kalınlığı":"Stroke Width","Thumbnail Gölge Efekti":"Thumbnail Shadow Effect","Dolgu":"Fill","Dolgu Rengi":"Fill Color","Kenarlık Rengi":"Stroke Color","Köşe Yuvarlaklığı":"Corner Radius","Fırça Rengi":"Brush Color","Fırça Kalınlığı":"Brush Size","Çizim Modunu Kapat":"Finish Drawing","Döndürme Açısı":"Rotation Angle","Üste":"Up","Alta":"Down","Geri Al":"Undo","İleri Al":"Redo","Dikdörtgen":"Rectangle","Daire":"Circle","Yıldız / Parlama":"Star / Burst","Ok İşareti":"Arrow","Thumbnail Rozeti":"Thumbnail Badge","Düzenlemek için canvas üzerinden bir metin, şekil veya katman seçin.":"Select text, a shape, or a layer on the canvas to edit it.","Çizim Modu Devrede":"Drawing Mode Active","Opaklık":"Opacity","Bir Üste Taşı":"Move Up","Bir Alta Taşı":"Move Down","Çoğalt":"Duplicate","Katmanı Sil":"Delete Layer","Henüz katman yok":"No layers yet","Metin, şekil veya çizim ekleyerek başlayın.":"Add text, shapes, or drawings to get started.","Canvas Arka Plan Rengi":"Canvas Background Color","Format Seçenekleri":"Format Options","PNG (Yüksek Kalite)":"PNG (High Quality)","JPG (Küçük Boyut)":"JPG (Small File)","Yazı Ekle":"Add Text","Şekil Ekle":"Add Shape","Serbest Çizim":"Freehand Drawing","Görsel veya Arka Plan Yükle":"Upload Image or Background","Seçili görselin arka planını kaldır":"Remove the selected image background","Dil seçin":"Select language","Gizle":"Hide","Göster":"Show","Katmanı":"Layer"}
   };
+  translationSets.en['Öğe Seçilmedi'] = 'No Item Selected';
   let translations = translationSets.en;
   const originalText = new WeakMap();
   const originalAttributes = new Map();
@@ -119,12 +118,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function loadLanguage(code) {
-    const languageCode = translationSets[code] ? code : 'en';
-    translations = translationSets[languageCode];
-    languageSelect.value = languageCode;
-    localStorage.setItem('tedit-language', languageCode);
+    translations = translationSets.en;
     translatePage();
     updateUI();
+    render();
   }
 
   // Top Bar View Elements
@@ -185,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
 
   function init() {
-    loadLanguage(localStorage.getItem('tedit-language') || 'tr');
+    loadLanguage();
     setupCanvasScaling();
     window.addEventListener('resize', setupCanvasScaling);
     bindEvents();
@@ -1015,7 +1012,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: generateId(),
       name: t('Metin') + ' ' + (state.layers.filter(l => l.type === 'text').length + 1),
       type: 'text',
-      text: 'YAZI BURAYA',
+      text: 'TEXT HERE',
       fontFamily: 'Montserrat',
       fontSize: 80,
       fill: '#FFFFFF',
@@ -1434,7 +1431,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
 
   function bindEvents() {
-    languageSelect.addEventListener('change', (e) => loadLanguage(e.target.value));
     // Ctrl + Mouse Wheel Zoom (Canvas Zooming)
     canvasViewport.addEventListener('wheel', (e) => {
       if (e.ctrlKey || e.metaKey) {

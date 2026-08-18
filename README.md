@@ -125,6 +125,7 @@ Keep canvas dimensions configurable through `state.canvasWidth` and `state.canva
 | `Space + Drag` | Pan the viewport |
 | `Delete` / `Backspace` | Delete the selected layer |
 | Click | Select a layer |
+| `Ctrl/Cmd + Click` | Add or remove a layer from the multi-selection |
 
 ## Development notes
 
@@ -141,13 +142,15 @@ Recommended manual regression checks:
 3. Verify undo/redo across more than five changes.
 4. Check center snapping, zoom, pan, and both export formats.
 5. Confirm exported files are 1280 × 720 and that transparent PNG output behaves as expected.
+6. Multi-select layers with `Ctrl/Cmd + Click`, move them together, move them with arrow keys, and delete them as a group.
+7. Enter multiple lines in a text layer and verify centered line spacing, sizing, selection, and export.
 
 ## Known limitations and extension points
 
 - No local project persistence; `localStorage` or IndexedDB could be added.
 - Font choices are currently a fixed list; custom font loading is not implemented.
 - History is limited to 30 states.
-- Multi-selection and group transforms are not supported.
+- Multi-selection currently supports group movement and group deletion; resize and rotation remain single-layer operations.
 - Snap guides currently focus on canvas center alignment.
 - Touch interaction and mobile editing can be improved.
 

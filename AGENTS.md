@@ -1,224 +1,229 @@
-﻿# AGENTS.md — Tedit için AI Ajan Rehberi
+# AGENTS.md — Tedit Development Guide
 
-Bu dosya, Tedit projesini inceleyen veya geliştiren AI ajanlar (Copilot, Antigravity, Claude, GPT vb.) için kapsamlı bir rehberdir.
+This document describes the current architecture and conventions for contributors and AI coding agents working on Tedit.
 
----
+## Project overview
 
-## 🗺️ Proje Özeti
-
-| Özellik | Değer |
+| Property | Current value |
 |---|---|
-| Proje Adı | Tedit |
-| Tür | Tarayıcı tabanlı görsel editör |
-| Teknoloji | Vanilla JS, HTML5 Canvas API, CSS3 |
-| Bağımlılık | Yok (sıfır npm/node bağımlılığı) |
-| Giriş Noktası | `index.html` |
-| Canvas Boyutu | 1280 × 720 px (YouTube standardı) |
-| Yaklaşık Kod Büyüklüğü | ~3.100 satır (JS: 1779, CSS: 1076, HTML: 357) |
+| Project | Tedit |
+| Type | Browser-based YouTube thumbnail editor |
+| Stack | Vanilla JavaScript, HTML5 Canvas API, CSS3 |
+| Dependencies | No npm or runtime dependencies |
+| Entry point | `index.html` |
+| Logical canvas | 1280 × 720 px |
+| Current source size | `app.js` ~1,895 lines, `style.css` ~1,101 lines, `index.html` ~372 lines |
 
----
+The editor is client-side only. It has no backend and does not persist projects between page reloads. Google Fonts and Material Symbols are external UI dependencies and require a network connection for the complete visual experience.
 
-## 📁 Dosya Haritası
+## Repository layout
 
-```
+```text
 Tedit/
-├── index.html   ← HTML yapısı, tüm DOM elementleri, panel düzenleri
-├── style.css    ← Tüm stiller (dark theme, floating panels, animasyonlar)
-├── app.js       ← Uygulama mantığı (tek büyük IIFE-like modül)
-├── README.md    ← Kullanıcı belgesi
-└── AGENTS.md    ← Bu dosya
+├── index.html     # DOM structure, panels, controls, and canvas elements
+├── style.css      # Dark theme, floating panels, controls, and responsive layout
+├── app.js         # State, rendering, interactions, layer operations, translation, and export
+├── README.md      # Developer-facing project documentation
+├── AGENTS.md      # This guide
+└── LICENSE        # License text, when present in the checkout
 ```
 
----
+## Application architecture
 
-## 🔑 Temel Mimari: `app.js`
+All application logic is inside one `DOMContentLoaded` callback in `app.js`. State and helper functions are intentionally kept private; nothing is exported to the global scope.
 
-Tüm uygulama mantığı `app.js` içindeki tek bir `DOMContentLoaded` dinleyicisinin içinde kapsüllenmiştir. **Global scope'a hiçbir şey sızdırılmaz.**
+### Main code areas
 
-### Bölüm Haritası (`app.js`)
+| Area | Approximate location | Responsibility |
+|---|---:|---|
+| State and DOM references | `app.js` 1–125 | Canvas contexts, state, controls, translation helpers |
+| Initialization and scaling | 126–240 | Startup, responsive canvas sizing, zoom transform |
+| History | 241–310 | Snapshot creation, undo, redo, image restoration |
+| Rendering | 311–636 | Background, layers, live drawing, snap guides |
+| Selection and pointer interaction | 637–1000 | Hit testing, moving, resizing, rotation, panning |
+| Layer creation and tools | 1001–1215 | Text, shapes, images, freehand strokes, background removal |
+| UI and layers panel | 1217–1410 | Properties synchronization and drag-and-drop ordering |
+| Export and event bindings | 1411–1895 | PNG/JPG output, controls, keyboard shortcuts |
 
-| Satır Aralığı | Bölüm | Açıklama |
-|---|---|---|
-| 1–50 | State Init | `state` nesnesi tanımı |
-| 52–127 | DOM Refs | Tüm element referansları |
-| 128–183 | Init & Scaling | `init()`, `setupCanvasScaling()`, responsive viewport |
-| 185–252 | History | `saveHistoryState()`, `undo()`, `redo()`, `restoreState()` |
-| 254–290 | Render Loop | `render()` — ana çizim döngüsü |
-| 292–350 | Snap Guidelines | Hizalama kılavuz çizgileri, merkez artı/nokta |
-| 351–600 | Layer Rendering | `renderLayer()`, `drawRect()`, `drawCircle()`, `drawStar()`, `drawArrow()`, `drawBadge()`, `drawText()`, `drawFreehand()` |
-| 600–800 | Selection Handles | 8 tutamaç + döndürme, `renderSelectionHandles()` |
-| 800–1000 | Mouse Events | `handleMouseDown/Move/Up()`, drag, resize, rotate |
-| 1000–1150 | Snap Logic | Magnetik snap hesaplama |
-| 1150–1350 | Tool Actions | Metin/şekil/çizim ekleme, görsel yükleme |
-| 1350–1550 | Layer Panel | `renderLayersPanel()`, sürükle-bırak sıralama |
-| 1550–1650 | Properties Panel | `updateUI()`, form→state senkronizasyonu |
-| 1650–1779 | Event Bindings | `bindEvents()`, klavye kısayolları, export |
+Line ranges are orientation only; update this table if major sections are reorganized.
 
----
+## Canvas and coordinate model
 
-## 🧱 Katman (Layer) Veri Modeli
+Two canvases share the logical 1280 × 720 coordinate space:
 
-Tüm katmanlar `state.layers[]` dizisinde tutulur. Render sırası: **index 0 = en altta**.
+| Element | Purpose |
+|---|---|
+| `#main-canvas` | Final composition and export source |
+| `#interactive-canvas` | Selection handles, alignment guides, and live drawing preview |
 
-### Ortak Alanlar (tüm türlerde)
+`state.scale` controls responsive display sizing. `state.userZoom`, `state.panX`, and `state.panY` are applied to `#canvas-wrapper` with a CSS transform. Layer coordinates must remain in logical canvas space.
 
-```typescript
-{
-  id: string;          // 'layer_' + rastgele 9 karakter
-  type: LayerType;     // aşağıya bakın
-  x: number;           // sol üst köşe X (canvas koordinatı)
-  y: number;           // sol üst köşe Y (canvas koordinatı)
-  width: number;       // piksel genişlik
-  height: number;      // piksel yükseklik
-  rotation: number;    // derece, -180..180
-  opacity: number;     // 0..100
-  visible: boolean;
-  label: string;       // katman panelinde görünen isim
-}
-```
+Pointer coordinates are converted from the displayed interactive canvas as follows:
 
-### `type: 'text'`
-```typescript
-{
-  text: string;
-  fontFamily: string;
-  fontSize: number;    // 16..250
-  color: string;       // hex
-  strokeColor: string; // hex
-  strokeWidth: number; // 0..30
-  shadow: boolean;
-}
-```
-
-### `type: 'rect'`
-```typescript
-{
-  fillEnabled: boolean;
-  fillColor: string;
-  strokeColor: string;
-  strokeWidth: number; // 0..30
-  radius: number;      // köşe yuvarlaklığı 0..60
-}
-```
-
-### `type: 'circle'`
-```typescript
-{
-  fillEnabled: boolean;
-  fillColor: string;
-  strokeColor: string;
-  strokeWidth: number;
-}
-```
-
-### `type: 'star'` | `type: 'arrow'` | `type: 'badge'`
-```typescript
-{
-  fillEnabled: boolean;
-  fillColor: string;
-  strokeColor: string;
-  strokeWidth: number;
-}
-```
-
-### `type: 'image'`
-```typescript
-{
-  _imgElement: HTMLImageElement;
-  _imgSrc: string;     // (yalnızca history snapshot'larında)
-}
-```
-
-### `type: 'freehand'`
-```typescript
-{
-  points: Array<{ x: number; y: number }>;
-  color: string;
-  size: number;        // 2..60
-}
-```
-
----
-
-## 🖥️ Canvas Koordinat Sistemi
-
-Uygulama **iki farklı koordinat alanı** kullanır:
-
-| Alan | Açıklama | Dönüşüm |
-|---|---|---|
-| **Canvas Koordinatları** | 1280×720 mantıksal alan, layer verileri burada saklanır | — |
-| **Ekran Koordinatları** | Kullanıcının gördüğü ölçeklenmiş + kaydırılmış alan | `(ekran - panOffset) / (scale * zoom)` |
-
-Mouse olaylarında ekran → canvas dönüşümü:
 ```js
-// interactiveCanvas üzerindeki tıklama koordinatı:
 const rect = interactiveCanvas.getBoundingClientRect();
-const scaleX = state.canvasWidth / rect.width;
-const scaleY = state.canvasHeight / rect.height;
-const canvasX = (event.clientX - rect.left) * scaleX;
-const canvasY = (event.clientY - rect.top) * scaleY;
+const canvasX = ((event.clientX - rect.left) / rect.width) * state.canvasWidth;
+const canvasY = ((event.clientY - rect.top) / rect.height) * state.canvasHeight;
 ```
 
-> **Önemli:** Pan ve zoom etkisi `canvasWrapper` üzerindeki CSS `transform`'a yansıtılır, canvas koordinatları değişmez.
+Always use `state.canvasWidth` and `state.canvasHeight`; do not add new hard-coded canvas dimensions.
 
----
+## State model
 
-## 🛠️ Değişiklik Yaparken Dikkat Edilecek Kurallar
+The central state object currently includes:
 
-### 1. State Tutarlılığı
-- `state.layers` dizisini doğrudan mutate edebilirsiniz; ancak her değişiklikten sonra `saveHistoryState()` ve `render()` çağrılmalıdır.
-- History snapshot'ları `image` türü için `_imgSrc` kullanır; `_imgElement` serialize edilmez.
-
-### 2. Render'ı Tetikleme
-Herhangi bir görsel değişiklik için:
 ```js
-saveHistoryState(); // değişiklik kaydedilmeli
-render();           // sonra render
-updateUI();         // panel güncelleme (gerekirse)
+{
+  canvasWidth: 1280,
+  canvasHeight: 720,
+  backgroundColor: '#FFFFFF',
+  layers: [],
+  selectedLayerId: null,
+  activeTool: 'select', // 'select' | 'drawing'
+  history: [],
+  historyIndex: -1,
+  scale: 1,
+  userZoom: 1,
+  panX: 0,
+  panY: 0,
+  isPanning: false,
+  snapLines: { x: false, y: false },
+  drawingBrush: { color: '#FF2B2B', size: 12, points: [] }
+}
 ```
 
-### 3. Yeni Katman Türü Ekleme
-1. `state.layers`'a yeni bir obje push edin (ortak alanlar + tipe özgü alanlar).
-2. `renderLayer()` içine `case 'yeni-tur':` ekleyin.
-3. `renderLayersPanel()`'da ikon/label tanımı ekleyin.
-4. Gerekirse Properties Panel'e yeni kontroller ekleyin ve `updateUI()` + `bindEvents()` içinde bağlayın.
+Layer order is significant: `state.layers[0]` renders first and is the bottom layer. The layer panel displays the array in reverse order so the top layer appears first.
 
-### 4. CSS Değişikliği
-Tüm renkler ve boyutlar CSS custom properties (`--` değişkenleri) ile yönetilir. Renk değişikliklerini doğrudan hex yazmak yerine `:root` bloğundan yapın.
+## Layer data model
 
-### 5. Boyut Sınırları
-Canvas boyutu şu an **sabit 1280×720**'dir. `state.canvasWidth` ve `state.canvasHeight` aracılığıyla referans alın; sabit sayı yazmayın.
+All layers have `id`, `type`, `x`, `y`, `width`, `height`, `rotation`, `opacity`, and `visible`. User-facing layers also have a `name` field.
 
----
+### Text layer
 
-## 🔒 Güvenlik & Kısıtlamalar
+```js
+{
+  type: 'text',
+  text, fontFamily, fontSize,
+  fill, stroke, strokeWidth, shadow,
+  x, y, width, height, rotation, opacity, visible, name
+}
+```
 
-- **CORS:** Yüklenen görseller `FileReader` API ile `data:` URL'e dönüştürülür, cross-origin sorun yoktur.
-- **Persistent Storage Yok:** Oturum verisi saklanmaz; sayfa yenilendiğinde her şey sıfırlanır.
-- **Offline:** Uygulama mantığı offline çalışır; Google Fonts ve Material Symbols için internet gerekir.
+### Shape layer
 
----
+All supported geometric shapes use one layer type and select the concrete shape with `shapeType`:
 
-## 🧪 Test Stratejisi
+```js
+{
+  type: 'shape',
+  shapeType: 'rect' | 'circle' | 'star' | 'arrow' | 'badge',
+  fill, fillEnabled, stroke, strokeWidth, radius,
+  x, y, width, height, rotation, opacity, visible, name
+}
+```
 
-Bu proje otomatik test içermez. Manuel test adımları:
+### Image layer
 
-1. **Metin:** Metin ekle → font/boyut/renk/stroke değiştir → PNG olarak indir → boyutları doğrula.
-2. **Şekil:** Her şekil türünü ekle → seç → yeniden boyutlandır → döndür → opaklık ayarla.
-3. **Undo/Redo:** 5+ eylem yap → `Ctrl+Z` ile geri dön → `Ctrl+Y` ile ileri git.
-4. **Snap:** Katmanı yavaşça ortaya sürükle → mavi kılavuz çizgiler ve kırmızı merkez noktası belirsin.
-5. **Export:** PNG ve JPG olarak indir → dosya boyutlarını ve 1280×720 boyutunu doğrula.
+```js
+{
+  type: 'image',
+  _imgElement: HTMLImageElement,
+  x, y, width, height, rotation, opacity, visible, name
+}
+```
 
----
+Image history snapshots store `_imgSrc` instead of serializing `_imgElement`. `restoreState()` recreates the image element from that data URL.
 
-## 💡 Bilinen Sınırlamalar & Geliştirme Fırsatları
+### Drawing layer
 
-| Alan | Mevcut Durum | Potansiyel İyileştirme |
-|---|---|---|
-| Kalıcı Depolama | Yok | `localStorage` veya IndexedDB ile proje kaydetme |
-| Font Yükleme | Sabit 7 Google Font | Font yükleme desteği veya genişletilmiş liste |
-| Geri Alma Limiti | 30 adım | Ayarlanabilir limit |
-| Çoklu Seçim | Desteklenmiyor | Shift+tıklama ile çoklu katman seçimi |
-| Kılavuz Çizgiler | Yalnızca merkez | Özel konumlandırılabilir kılavuzlar |
-| Responsive | Kısmi | Tam mobil dokunma desteği |
-| Keyboard Shortcuts | Ctrl+Z/Y, Delete | Daha kapsamlı kısayol seti |
+```js
+{
+  type: 'drawing',
+  points: Array<{ x: number, y: number }>,
+  strokeColor, strokeWidth,
+  x, y, width, height, rotation, opacity, visible, name
+}
+```
+
+Freehand points are normalized around the stroke center when the layer is created. While drawing, points remain temporarily in `state.drawingBrush.points` and are committed with `saveStrokeLayer()`.
+
+## Mutation and rendering rules
+
+For a persistent document change, use the established sequence:
+
+```js
+saveHistoryState();
+render();
+updateUI(); // when properties or layer controls changed
+```
+
+During continuous pointer movement, update the layer and call `render()` for responsiveness; save one history snapshot when the interaction is committed on pointer-up or control change. Do not add history entries for every mousemove.
+
+When adding a new layer type or tool:
+
+1. Add the layer factory data and a stable `type` value.
+2. Handle it in `renderLayer()` and any relevant drawing helper.
+3. Add its display name and icon to `renderLayersPanel()`.
+4. Add property controls and synchronization in `updateUI()` and `bindEvents()`.
+5. Include it in history, visibility, duplication, deletion, hit testing, and export paths.
+6. Add a manual regression check to the README or test notes.
+
+## Current tools and behaviors
+
+- Text: font family, 16–250 px size, fill, stroke, stroke width, and shadow.
+- Shapes: rectangle, circle, star/burst, arrow, and badge; fill toggle, fill/stroke colors, stroke width, and radius.
+- Drawing: continuous freehand mode with brush size 2–60 px; finish with the drawing control or `Escape`.
+- Images: local `image/*` uploads are converted to data URLs by `FileReader`.
+- Background removal: image-only tool that removes pixels near a selected color using a configurable 0–150 tolerance; it creates a processed data-URL image for the selected image layer.
+- Layers: select, hide/show, reorder via HTML5 drag-and-drop, move up/down, duplicate, delete, and opacity 0–100%.
+- Alignment: center snapping exposes horizontal/vertical guides through `state.snapLines`.
+- Export: `mainCanvas.toDataURL()` produces PNG or JPG files named `Tedit_Thumbnail_1280x720.*`.
+
+## Translation behavior
+
+The UI markup is currently authored in Turkish. `translationSets.en` contains the English labels, and `translatePage()` updates text nodes plus `title`, `placeholder`, and `aria-label` attributes. Shape buttons use `data-translation-key`.
+
+`loadLanguage()` currently selects the English set regardless of the optional code argument. If additional languages are introduced, preserve the original-text tracking in `originalText` and `originalAttributes` so repeated translations do not compound replacements.
+
+## CSS conventions
+
+Visual constants should use the custom properties in `:root` in `style.css`, including `--bg-main`, `--bg-panel`, `--accent-color`, `--brand-red`, `--danger-color`, and `--panel-width`. Avoid introducing repeated color or spacing literals when a theme variable exists. Preserve the floating-panel layout and the canvas viewport's stacking order.
+
+## Keyboard and pointer controls
+
+| Control | Action |
+|---|---|
+| `Ctrl/Cmd + Z` | Undo |
+| `Ctrl/Cmd + Y` or `Ctrl/Cmd + Shift + Z` | Redo |
+| `Ctrl/Cmd + Mouse Wheel` | Zoom, clamped to 25%–350% |
+| `Ctrl/Cmd + 0` | Reset zoom and pan |
+| `Space + Drag` or middle-button drag | Pan |
+| Arrow keys | Move selected layer by 2 px; `Shift` moves by 10 px |
+| `Delete` / `Backspace` | Delete selected layer |
+| `Escape` | Exit drawing mode or clear selection |
+
+## Validation
+
+There is no automated test suite or build pipeline. Validate changes manually in a modern browser:
+
+1. Load the page and confirm both canvases initialize without console errors.
+2. Add, edit, move, resize, rotate, hide, duplicate, reorder, and delete each layer type.
+3. Draw multiple strokes without leaving drawing mode and verify each stroke becomes a layer.
+4. Upload an image, remove a background, then test undo/redo and export.
+5. Verify center snapping, zoom limits, panning, keyboard movement, and responsive resizing.
+6. Export PNG and JPG and confirm the output dimensions are 1280 × 720.
+7. Switch the UI to English and check text nodes, tooltips, placeholders, and shape labels.
+
+## Known limitations
+
+- No project persistence or import/export of editable layer data.
+- Only the English translation set is active; the source markup remains Turkish.
+- History is limited to 30 snapshots and does not include viewport zoom/pan.
+- No multi-selection, grouping, or alignment to arbitrary guides.
+- Touch editing is not a dedicated interaction path.
+- Background removal is color/tolerance based and is not semantic image segmentation.
+- No automated tests, linting, or dependency management are configured.
+
+## Safety and scope
+
+Do not modify or discard unrelated working-tree changes. Before committing, inspect `git status` and stage only the files relevant to the requested task. Avoid destructive Git commands such as `reset --hard` or `checkout --` unless explicitly requested.

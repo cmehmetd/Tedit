@@ -35,7 +35,7 @@
   --radius-full: 9999px;
   
   --shadow-main: 0 10px 30px rgba(0, 0, 0, 0.5);
-  --shadow-panel: 0 14px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-panel: none;
   --transition-fast: 0.15s ease;
   --transition-smooth: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -107,7 +107,7 @@ body {
 
 .floating-panel:hover {
   border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(39, 179, 255, 0.2);
+  box-shadow: none;
 }
 
 .language-select {
@@ -357,7 +357,7 @@ body {
 
 .properties-panel:hover {
   border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75);
+  box-shadow: none;
 }
 
 .panel-header {
@@ -826,7 +826,7 @@ input[type="color"]::-webkit-color-swatch {
 
 .layers-panel:hover {
   border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75);
+  box-shadow: none;
 }
 
 .badge-count {

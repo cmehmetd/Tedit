@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     backgroundColor: '#FFFFFF',
     layers: [],
     selectedLayerId: null,
+    selectedLayerIds: [],
     activeTool: 'select', // 'select' | 'drawing'
     history: [],
     historyIndex: -1,
@@ -78,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const removeBgToleranceValue = document.getElementById('remove-bg-tolerance-value');
   const applyRemoveBg = document.getElementById('apply-remove-bg');
   const translationSets = {
-    en: {"Arka Plan:":"Background:","İndir":"Download","Özellikler":"Properties","Seçim Yok":"No Selection","Katmanlar":"Layers","Metin":"Text","Şekil":"Shape","Çizim":"Drawing","Görsel":"Image","Arkaplanı Kaldır":"Remove Background","Uygula":"Apply","Silinecek renk":"Color to remove","Tolerans:":"Tolerance:","Metin İçeriği":"Text Content","Yazı girin...":"Enter text...","Yazı Tipi (Font)":"Font Family","Yazı Boyutu":"Font Size","Yazı Rengi":"Text Color","Kenarlık":"Stroke","Kenar Kalınlığı":"Stroke Width","Thumbnail Gölge Efekti":"Thumbnail Shadow Effect","Dolgu":"Fill","Dolgu Rengi":"Fill Color","Kenarlık Rengi":"Stroke Color","Köşe Yuvarlaklığı":"Corner Radius","Fırça Rengi":"Brush Color","Fırça Kalınlığı":"Brush Size","Çizim Modunu Kapat":"Finish Drawing","Döndürme Açısı":"Rotation Angle","Üste":"Up","Alta":"Down","Geri Al":"Undo","İleri Al":"Redo","Dikdörtgen":"Rectangle","Daire":"Circle","Yıldız / Parlama":"Star / Burst","Ok İşareti":"Arrow","Thumbnail Rozeti":"Thumbnail Badge","Düzenlemek için canvas üzerinden bir metin, şekil veya katman seçin.":"Select text, a shape, or a layer on the canvas to edit it.","Çizim Modu Devrede":"Drawing Mode Active","Opaklık":"Opacity","Bir Üste Taşı":"Move Up","Bir Alta Taşı":"Move Down","Çoğalt":"Duplicate","Katmanı Sil":"Delete Layer","Henüz katman yok":"No layers yet","Metin, şekil veya çizim ekleyerek başlayın.":"Add text, shapes, or drawings to get started.","Canvas Arka Plan Rengi":"Canvas Background Color","Format Seçenekleri":"Format Options","PNG (Yüksek Kalite)":"PNG (High Quality)","JPG (Küçük Boyut)":"JPG (Small File)","Yazı Ekle":"Add Text","Şekil Ekle":"Add Shape","Serbest Çizim":"Freehand Drawing","Görsel veya Arka Plan Yükle":"Upload Image or Background","Seçili görselin arka planını kaldır":"Remove the selected image background","Dil seçin":"Select language","Gizle":"Hide","Göster":"Show","Katmanı":"Layer"}
+    en: {"Arka Plan:":"Background:","İndir":"Download","Özellikler":"Properties","Seçim Yok":"No Selection","Katmanlar":"Layers","Metin":"Text","Şekil":"Shape","Çizim":"Drawing","Görsel":"Image","Arkaplanı Kaldır":"Remove Background","Uygula":"Apply","Silinecek renk":"Color to remove","Tolerans:":"Tolerance:","Metin İçeriği":"Text Content","Yazı girin...":"Enter text...","Yazı Tipi (Font)":"Font Family","Yazı Boyutu":"Font Size","Yazı Rengi":"Text Color","Kenarlık":"Stroke","Kenar Kalınlığı":"Stroke Width","Thumbnail Gölge Efekti":"Thumbnail Shadow Effect","Gölge Rengi":"Shadow Color","Dolgu":"Fill","Dolgu Rengi":"Fill Color","Kenarlık Rengi":"Stroke Color","Köşe Yuvarlaklığı":"Corner Radius","Fırça Rengi":"Brush Color","Fırça Kalınlığı":"Brush Size","Çizim Modunu Kapat":"Finish Drawing","Döndürme Açısı":"Rotation Angle","Üste":"Up","Alta":"Down","Geri Al":"Undo","İleri Al":"Redo","Dikdörtgen":"Rectangle","Daire":"Circle","Yıldız / Parlama":"Star / Burst","Ok İşareti":"Arrow","Thumbnail Rozeti":"Thumbnail Badge","Düzenlemek için canvas üzerinden bir metin, şekil veya katman seçin.":"Select text, a shape, or a layer on the canvas to edit it.","Çizim Modu Devrede":"Drawing Mode Active","Opaklık":"Opacity","Bir Üste Taşı":"Move Up","Bir Alta Taşı":"Move Down","Çoğalt":"Duplicate","Katmanı Sil":"Delete Layer","Henüz katman yok":"No layers yet","Metin, şekil veya çizim ekleyerek başlayın.":"Add text, shapes, or drawings to get started.","Canvas Arka Plan Rengi":"Canvas Background Color","Format Seçenekleri":"Format Options","PNG (Yüksek Kalite)":"PNG (High Quality)","JPG (Küçük Boyut)":"JPG (Small File)","Yazı Ekle":"Add Text","Şekil Ekle":"Add Shape","Serbest Çizim":"Freehand Drawing","Görsel veya Arka Plan Yükle":"Upload Image or Background","Seçili görselin arka planını kaldır":"Remove the selected image background","Dil seçin":"Select language","Gizle":"Hide","Göster":"Show","Katmanı":"Layer"}
   };
   translationSets.en['Öğe Seçilmedi'] = 'No Item Selected';
   let translations = translationSets.en;
@@ -151,6 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const propStrokeWidth = document.getElementById('prop-stroke-width');
   const propStrokeWidthNum = document.getElementById('prop-stroke-width-num');
   const propTextShadow = document.getElementById('prop-text-shadow');
+  const propShadowColor = document.getElementById('prop-shadow-color');
+  const shadowColorHex = document.getElementById('shadow-color-hex');
 
   // Shape Inputs
   const propShapeFillEnabled = document.getElementById('prop-shape-fill-enabled');
@@ -333,10 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.activeTool === 'drawing' && state.drawingBrush.points.length > 0) {
       renderLiveDrawing(interCtx);
     } else if (state.selectedLayerId && state.activeTool !== 'drawing') {
-      const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
-      if (activeLayer && activeLayer.visible) {
-        renderSelectionHandles(interCtx, activeLayer);
-      }
+      state.layers.filter(l => state.selectedLayerIds.includes(l.id) && l.visible)
+        .forEach(layer => renderSelectionHandles(interCtx, layer, layer.id === state.selectedLayerId));
     }
 
     renderLayersPanel();
@@ -434,27 +435,61 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    const metrics = ctx.measureText(layer.text);
-    layer.width = metrics.width + (layer.strokeWidth || 0) * 2 + 30;
-    layer.height = layer.fontSize * 1.25;
+    // Textarea normally stores real line breaks, but also accept serialized
+    // "\\n" sequences so imported/older layer data renders consistently.
+    const lines = String(layer.text || '').replace(/\\n/g, '\n').split(/\r\n|\n|\r/);
+    const lineHeight = layer.fontSize * 1.25;
+    const maxLineWidth = Math.max(...lines.map(line => ctx.measureText(line).width), 0);
+    layer.width = maxLineWidth + (layer.strokeWidth || 0) * 2 + 30;
+    layer.height = Math.max(lineHeight, lines.length * lineHeight);
 
     if (layer.shadow) {
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      ctx.shadowColor = layer.shadowColor || 'rgba(0, 0, 0, 0.85)';
       ctx.shadowBlur = 18;
       ctx.shadowOffsetX = 6;
       ctx.shadowOffsetY = 6;
     }
 
-    if (layer.strokeWidth > 0) {
-      ctx.strokeStyle = layer.stroke || '#000000';
-      ctx.lineWidth = layer.strokeWidth;
-      ctx.lineJoin = 'round';
-      ctx.miterLimit = 2;
-      ctx.strokeText(layer.text, 0, 0);
-    }
+    let textOffset = 0;
+    lines.forEach((line, index) => {
+      const lineY = (index - (lines.length - 1) / 2) * lineHeight;
+      const lineWidth = ctx.measureText(line).width;
+      let cursorX = -lineWidth / 2;
+      [...line].forEach((character, characterIndex) => {
+        const charWidth = ctx.measureText(character).width;
+        const color = getTextCharacterColor(layer, textOffset + characterIndex);
+        const charCenterX = cursorX + charWidth / 2;
+        if (layer.strokeWidth > 0) {
+          ctx.strokeStyle = layer.stroke || '#000000';
+          ctx.lineWidth = layer.strokeWidth;
+          ctx.lineJoin = 'round';
+          ctx.miterLimit = 2;
+          ctx.strokeText(character, charCenterX, lineY);
+        }
+        ctx.fillStyle = color;
+        ctx.fillText(character, charCenterX, lineY);
+        cursorX += charWidth;
+      });
+      textOffset += line.length + 1;
+    });
+  }
 
-    ctx.fillStyle = layer.fill || '#FFFFFF';
-    ctx.fillText(layer.text, 0, 0);
+  function getTextCharacterColor(layer, index) {
+    const style = (layer.textStyles || []).find(item => index >= item.start && index < item.end);
+    return style ? style.color : (layer.fill || '#FFFFFF');
+  }
+
+  function applyTextColorToSelection(layer, color) {
+    const start = propTextContent.selectionStart;
+    const end = propTextContent.selectionEnd;
+    if (start === end) {
+      layer.fill = color;
+      return;
+    }
+    const styles = (layer.textStyles || []).filter(item => item.end <= start || item.start >= end);
+    styles.push({ start, end, color });
+    styles.sort((a, b) => a.start - b.start);
+    layer.textStyles = styles;
   }
 
   function renderShapeLayer(ctx, layer) {
@@ -634,7 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Selection Bounding Box & Transform Handles
   // =========================================================================
 
-  function renderSelectionHandles(ctx, layer) {
+  function renderSelectionHandles(ctx, layer, showHandles = true) {
     ctx.save();
     ctx.translate(layer.x, layer.y);
     if (layer.rotation) {
@@ -650,6 +685,11 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.setLineDash([6, 4]);
     ctx.strokeRect(-halfW, -halfH, layer.width, layer.height);
     ctx.setLineDash([]);
+
+    if (!showHandles) {
+      ctx.restore();
+      return;
+    }
 
     // Draw Corner & Edge Handles
     const handles = getHandleCoordinates(layer.width, layer.height);
@@ -783,7 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
     let handle = null;
 
-    if (activeLayer && activeLayer.visible) {
+    if (activeLayer && activeLayer.visible && state.selectedLayerIds.length === 1) {
       handle = getHandleUnderCursor(coords, activeLayer);
     }
 
@@ -791,15 +831,33 @@ document.addEventListener('DOMContentLoaded', () => {
       state.isDragging = true;
       state.dragHandle = handle;
       state.dragStart = coords;
-      state.initialLayerState = JSON.parse(JSON.stringify(activeLayer));
+      state.initialLayerState = state.selectedLayerIds.map(id => {
+        const layer = state.layers.find(l => l.id === id);
+        return {
+          id,
+          x: layer.x,
+          y: layer.y,
+          width: layer.width,
+          height: layer.height,
+          rotation: layer.rotation,
+          fontSize: layer.fontSize
+        };
+      });
     } else {
       const clickedLayer = findLayerAtPoint(coords);
       if (clickedLayer) {
-        selectLayer(clickedLayer.id);
+        if (e.ctrlKey || e.metaKey) {
+          toggleLayerSelection(clickedLayer.id);
+        } else if (!state.selectedLayerIds.includes(clickedLayer.id)) {
+          selectLayer(clickedLayer.id);
+        }
         state.isDragging = true;
         state.dragHandle = 'move';
         state.dragStart = coords;
-        state.initialLayerState = JSON.parse(JSON.stringify(clickedLayer));
+        state.initialLayerState = state.selectedLayerIds.map(id => {
+          const layer = state.layers.find(l => l.id === id);
+          return { id, x: layer.x, y: layer.y };
+        });
       } else {
         selectLayer(null);
       }
@@ -839,13 +897,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
     if (!activeLayer || !state.initialLayerState) return;
 
-    const init = state.initialLayerState;
     const dx = coords.x - state.dragStart.x;
     const dy = coords.y - state.dragStart.y;
+    const init = state.initialLayerState.find(item => item.id === activeLayer.id);
 
     if (state.dragHandle === 'move') {
-      let targetX = init.x + dx;
-      let targetY = init.y + dy;
+      const initialPrimary = state.initialLayerState.find(item => item.id === activeLayer.id);
+      let targetX = initialPrimary.x + dx;
+      let targetY = initialPrimary.y + dy;
       
       const centerX = state.canvasWidth / 2; // 640
       const centerY = state.canvasHeight / 2; // 360
@@ -864,8 +923,13 @@ document.addEventListener('DOMContentLoaded', () => {
         snapY = true;
       }
 
-      activeLayer.x = targetX;
-      activeLayer.y = targetY;
+      state.initialLayerState.forEach(item => {
+        const layer = state.layers.find(l => l.id === item.id);
+        if (layer) {
+          layer.x = item.x + (targetX - initialPrimary.x);
+          layer.y = item.y + (targetY - initialPrimary.y);
+        }
+      });
       state.snapLines = { x: snapX, y: snapY };
     } else if (state.dragHandle === 'rotate') {
       const angleRad = Math.atan2(coords.y - activeLayer.y, coords.x - activeLayer.x);
@@ -1001,6 +1065,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function selectLayer(id) {
     state.selectedLayerId = id;
+    state.selectedLayerIds = id ? [id] : [];
+    state.snapLines = { x: false, y: false };
+    updateUI();
+    render();
+  }
+
+  function toggleLayerSelection(id) {
+    const index = state.selectedLayerIds.indexOf(id);
+    if (index >= 0) state.selectedLayerIds.splice(index, 1);
+    else state.selectedLayerIds.push(id);
+    state.selectedLayerId = state.selectedLayerIds[state.selectedLayerIds.length - 1] || null;
     state.snapLines = { x: false, y: false };
     updateUI();
     render();
@@ -1018,7 +1093,9 @@ document.addEventListener('DOMContentLoaded', () => {
       fill: '#FFFFFF',
       stroke: '#000000',
       strokeWidth: 10,
+      textStyles: [],
       shadow: true,
+      shadowColor: '#000000',
       x: 640,
       y: 360,
       width: 500,
@@ -1207,8 +1284,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function deleteSelectedLayer() {
     if (!state.selectedLayerId) return;
-    state.layers = state.layers.filter(l => l.id !== state.selectedLayerId);
-    state.selectedLayerId = state.layers.length > 0 ? state.layers[state.layers.length - 1].id : null;
+    const selectedIds = new Set(state.selectedLayerIds);
+    state.layers = state.layers.filter(l => !selectedIds.has(l.id));
+    state.selectedLayerId = null;
+    state.selectedLayerIds = [];
     saveHistoryState();
     updateUI();
     render();
@@ -1258,6 +1337,8 @@ document.addEventListener('DOMContentLoaded', () => {
         propStrokeWidth.value = activeLayer.strokeWidth || 0;
         propStrokeWidthNum.value = activeLayer.strokeWidth || 0;
         propTextShadow.checked = !!activeLayer.shadow;
+        propShadowColor.value = activeLayer.shadowColor || '#000000';
+        shadowColorHex.textContent = propShadowColor.value.toUpperCase();
       } else if (activeLayer.type === 'shape') {
         propTypeBadge.textContent = t('Şekil');
         shapeProps.classList.remove('hidden');
@@ -1320,7 +1401,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (/^Çizim \d+$/.test(layer.name)) displayName = `${t('Çizim')} ${layer.name.match(/\d+$/)[0]}`;
       if (layer.name === 'Görsel') displayName = t('Görsel');
       const item = document.createElement('div');
-      item.className = `layer-item ${layer.id === state.selectedLayerId ? 'active' : ''}`;
+      item.className = `layer-item ${state.selectedLayerIds.includes(layer.id) ? 'active' : ''}`;
       item.setAttribute('draggable', 'true');
       item.dataset.id = layer.id;
       
@@ -1355,7 +1436,8 @@ document.addEventListener('DOMContentLoaded', () => {
           render();
           return;
         }
-        selectLayer(layer.id);
+        if (e.ctrlKey || e.metaKey) toggleLayerSelection(layer.id);
+        else selectLayer(layer.id);
       });
 
       // HTML5 Drag & Drop Reordering
@@ -1612,7 +1694,7 @@ document.addEventListener('DOMContentLoaded', () => {
     propTextColor.addEventListener('input', (e) => {
       const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
       if (activeLayer && activeLayer.type === 'text') {
-        activeLayer.fill = e.target.value;
+        applyTextColorToSelection(activeLayer, e.target.value);
         textColorHex.textContent = e.target.value.toUpperCase();
         render();
       }
@@ -1663,6 +1745,16 @@ document.addEventListener('DOMContentLoaded', () => {
         render();
       }
     });
+
+    propShadowColor.addEventListener('input', (e) => {
+      const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
+      if (activeLayer && activeLayer.type === 'text') {
+        activeLayer.shadowColor = e.target.value;
+        shadowColorHex.textContent = e.target.value.toUpperCase();
+        render();
+      }
+    });
+    propShadowColor.addEventListener('change', saveHistoryState);
 
     // Shape Fill Toggle Listener
     propShapeFillEnabled.addEventListener('change', (e) => {
@@ -1869,14 +1961,17 @@ document.addEventListener('DOMContentLoaded', () => {
         applyCanvasTransform();
         updateZoomDisplay();
       } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
-        if (activeLayer) {
+        const selectedLayers = state.layers.filter(l => state.selectedLayerIds.includes(l.id));
+        if (selectedLayers.length) {
           e.preventDefault();
           const step = e.shiftKey ? 10 : 2;
-          if (e.key === 'ArrowUp') activeLayer.y -= step;
-          if (e.key === 'ArrowDown') activeLayer.y += step;
-          if (e.key === 'ArrowLeft') activeLayer.x -= step;
-          if (e.key === 'ArrowRight') activeLayer.x += step;
+          selectedLayers.forEach(layer => {
+            if (e.key === 'ArrowUp') layer.y -= step;
+            if (e.key === 'ArrowDown') layer.y += step;
+            if (e.key === 'ArrowLeft') layer.x -= step;
+            if (e.key === 'ArrowRight') layer.x += step;
+          });
+          saveHistoryState();
           render();
         }
       }

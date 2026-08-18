@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,69 +26,69 @@
 
       <!-- Panel 2: View & Canvas Settings (Zoom & Background) -->
       <div class="floating-panel view-panel">
-        <button id="btn-zoom-reset" class="zoom-btn" title="Ctrl + Mouse Scroll ile yakınlaştır / Sıfırlamak için tıkla">
+        <button id="btn-zoom-reset" class="zoom-btn" title="Zoom in with Ctrl + Mouse Wheel / Click to reset">
           <span class="material-symbols-outlined">zoom_in</span>
           <span id="zoom-val">100%</span>
         </button>
         <div class="divider-v"></div>
-        <div class="prop-item-inline" title="Canvas Arka Plan Rengi">
-          <label>Arka Plan:</label>
+        <div class="prop-item-inline" title="Canvas Background Color">
+          <label>Background:</label>
           <input type="color" id="prop-bg-color" value="#FFFFFF">
         </div>
       </div>
 
       <!-- Panel 3: Actions (Undo / Redo & Seamless Download Combined) -->
       <div class="floating-panel actions-panel">
-        <button id="btn-undo" class="icon-btn" title="Geri Al (Ctrl+Z)">
+        <button id="btn-undo" class="icon-btn" title="Undo (Ctrl+Z)">
           <span class="material-symbols-outlined">undo</span>
         </button>
-        <button id="btn-redo" class="icon-btn" title="İleri Al (Ctrl+Y)">
+        <button id="btn-redo" class="icon-btn" title="Redo (Ctrl+Y)">
           <span class="material-symbols-outlined">redo</span>
         </button>
         <div class="divider-v"></div>
         <div class="dropdown-container">
           <button id="btn-export-main" class="btn-export">
             <span class="material-symbols-outlined">download</span>
-            <span>İndir</span>
+            <span>Download</span>
           </button>
-          <button id="btn-export-options" class="dropdown-toggle" title="Format Seçenekleri">
+          <button id="btn-export-options" class="dropdown-toggle" title="Format Options">
             <span class="material-symbols-outlined">arrow_drop_down</span>
           </button>
           <div id="export-menu" class="dropdown-menu">
-            <button id="export-png"><span class="material-symbols-outlined">image</span> PNG (Yüksek Kalite)</button>
-            <button id="export-jpg"><span class="material-symbols-outlined">photo_library</span> JPG (Küçük Boyut)</button>
+            <button id="export-png"><span class="material-symbols-outlined">image</span> PNG (High Quality)</button>
+            <button id="export-jpg"><span class="material-symbols-outlined">photo_library</span> JPG (Small File)</button>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- Left Floating Properties Panel (Öğe Ayarları ve Özellikleri) -->
+    <!-- Left Floating Properties Panel (Item Settings & Properties) -->
     <aside class="properties-panel" id="properties-panel">
       <div class="panel-header">
         <div class="panel-title">
           <span class="material-symbols-outlined">tune</span>
-          <h3>Özellikler</h3>
+          <h3>Properties</h3>
         </div>
-        <span id="prop-type-badge" class="badge-type">Seçim Yok</span>
+        <span id="prop-type-badge" class="badge-type">No Selection</span>
       </div>
 
       <div class="panel-content">
         <!-- Empty State (No Item Selected) -->
         <div id="no-selection-hint" class="props-empty-state">
           <span class="material-symbols-outlined">touch_app</span>
-          <p>Öğe Seçilmedi</p>
-          <small>Düzenlemek için canvas üzerinden bir metin, şekil veya katman seçin.</small>
+          <p>No Item Selected</p>
+          <small>Select text, a shape, or a layer on the canvas to edit it.</small>
         </div>
 
         <!-- Text Properties -->
         <div id="text-props" class="props-group hidden">
           <div class="field-group">
-            <label class="field-label">Metin İçeriği</label>
-            <textarea id="prop-text-content" class="input-textarea" rows="2" placeholder="Yazı girin..."></textarea>
+            <label class="field-label">Text Content</label>
+            <textarea id="prop-text-content" class="input-textarea" rows="2" placeholder="Enter text..."></textarea>
           </div>
 
           <div class="field-group">
-            <label class="field-label">Yazı Tipi (Font)</label>
+            <label class="field-label">Font Family</label>
             <select id="prop-font-family" class="select-box-full">
               <option value="Montserrat" style="font-family: 'Montserrat';">Montserrat</option>
               <option value="Anton" style="font-family: 'Anton';">Anton</option>
@@ -102,7 +102,7 @@
 
           <div class="field-group">
             <div class="field-header">
-              <label class="field-label">Yazı Boyutu</label>
+              <label class="field-label">Font Size</label>
               <div class="num-input-wrapper">
                 <input type="number" id="prop-font-size-num" class="input-number" min="16" max="250" value="72">
                 <span class="unit-label">px</span>
@@ -113,14 +113,14 @@
 
           <div class="field-row">
             <div class="field-col">
-              <label class="field-label">Yazı Rengi</label>
+              <label class="field-label">Text Color</label>
               <div class="color-picker-wrapper">
                 <input type="color" id="prop-text-color" value="#FFFFFF">
                 <span class="color-val-label" id="text-color-hex">#FFFFFF</span>
               </div>
             </div>
             <div class="field-col">
-              <label class="field-label">Kenarlık</label>
+              <label class="field-label">Stroke</label>
               <div class="color-picker-wrapper">
                 <input type="color" id="prop-stroke-color" value="#000000">
                 <span class="color-val-label" id="stroke-color-hex">#000000</span>
@@ -130,7 +130,7 @@
 
           <div class="field-group">
             <div class="field-header">
-              <label class="field-label">Kenar Kalınlığı</label>
+              <label class="field-label">Stroke Width</label>
               <div class="num-input-wrapper">
                 <input type="number" id="prop-stroke-width-num" class="input-number" min="0" max="30" value="8">
                 <span class="unit-label">px</span>
@@ -140,12 +140,12 @@
           </div>
 
           <div class="field-group toggle-row">
-            <label class="field-label" for="prop-text-shadow">Thumbnail Gölge Efekti</label>
+            <label class="field-label" for="prop-text-shadow">Thumbnail Shadow Effect</label>
             <input type="checkbox" id="prop-text-shadow" class="checkbox-toggle" checked>
           </div>
 
           <div class="field-group color-field">
-            <label class="field-label" for="prop-shadow-color">Gölge Rengi</label>
+            <label class="field-label" for="prop-shadow-color">Shadow Color</label>
             <div class="color-picker-wrapper">
               <input type="color" id="prop-shadow-color" value="#000000">
               <span class="color-val-label" id="shadow-color-hex">#000000</span>
@@ -156,20 +156,20 @@
         <!-- Shape Properties -->
         <div id="shape-props" class="props-group hidden">
           <div class="field-group toggle-row">
-            <label class="field-label" for="prop-shape-fill-enabled">Dolgu</label>
+            <label class="field-label" for="prop-shape-fill-enabled">Fill</label>
             <input type="checkbox" id="prop-shape-fill-enabled" class="checkbox-toggle" checked>
           </div>
 
           <div class="field-row">
             <div class="field-col" id="shape-fill-col">
-              <label class="field-label">Dolgu Rengi</label>
+              <label class="field-label">Fill Color</label>
               <div class="color-picker-wrapper">
                 <input type="color" id="prop-shape-fill" value="#27B3FF">
                 <span class="color-val-label" id="shape-fill-hex">#27B3FF</span>
               </div>
             </div>
             <div class="field-col">
-              <label class="field-label">Kenarlık Rengi</label>
+              <label class="field-label">Stroke Color</label>
               <div class="color-picker-wrapper">
                 <input type="color" id="prop-shape-stroke" value="#000000">
                 <span class="color-val-label" id="shape-stroke-hex">#000000</span>
@@ -179,7 +179,7 @@
 
           <div class="field-group">
             <div class="field-header">
-              <label class="field-label">Kenar Kalınlığı</label>
+              <label class="field-label">Stroke Width</label>
               <div class="num-input-wrapper">
                 <input type="number" id="prop-shape-stroke-num" class="input-number" min="0" max="30" value="0">
                 <span class="unit-label">px</span>
@@ -190,7 +190,7 @@
 
           <div class="field-group">
             <div class="field-header">
-              <label class="field-label">Köşe Yuvarlaklığı</label>
+              <label class="field-label">Corner Radius</label>
               <div class="num-input-wrapper">
                 <input type="number" id="prop-shape-radius-num" class="input-number" min="0" max="60" value="0">
                 <span class="unit-label">px</span>
@@ -203,11 +203,11 @@
         <!-- Drawing Mode Properties -->
         <div id="draw-props" class="props-group hidden">
           <div class="badge-status-box">
-            <span class="pulse-dot"></span> Çizim Modu Devrede
+            <span class="pulse-dot"></span> Drawing Mode Active
           </div>
 
           <div class="field-group">
-            <label class="field-label">Fırça Rengi</label>
+            <label class="field-label">Brush Color</label>
             <div class="color-picker-wrapper">
               <input type="color" id="brush-color" value="#FF2B2B">
               <span class="color-val-label" id="brush-color-hex">#FF2B2B</span>
@@ -216,7 +216,7 @@
 
           <div class="field-group">
             <div class="field-header">
-              <label class="field-label">Fırça Kalınlığı</label>
+              <label class="field-label">Brush Size</label>
               <div class="num-input-wrapper">
                 <input type="number" id="brush-size-num" class="input-number" min="2" max="60" value="12">
                 <span class="unit-label">px</span>
@@ -226,14 +226,14 @@
           </div>
 
           <button id="btn-finish-drawing" class="btn btn-finish-draw">
-            <span class="material-symbols-outlined">check</span> Çizim Modunu Kapat
+            <span class="material-symbols-outlined">check</span> Finish Drawing
           </button>
         </div>
 
         <!-- Common Transform / Placement Info -->
         <div id="transform-props" class="props-group transform-box hidden">
           <div class="field-header">
-            <label class="field-label">Döndürme Açısı</label>
+            <label class="field-label">Rotation Angle</label>
             <div class="num-input-wrapper">
               <input type="number" id="prop-rotation-num" class="input-number" min="-180" max="180" value="0">
               <span class="unit-label">°</span>
@@ -258,63 +258,63 @@
       <!-- Floating Bottom Action Bar -->
       <div class="floating-bottom-bar">
         <div class="floating-bar-inner">
-          <button id="tool-text-btn" class="tool-btn" title="Yazı Ekle">
+          <button id="tool-text-btn" class="tool-btn" title="Add Text">
             <span class="material-symbols-outlined">title</span>
-            <span class="tool-label">Metin</span>
+            <span class="tool-label">Text</span>
           </button>
 
           <div class="tool-btn-wrapper">
-            <button id="tool-shape-btn" class="tool-btn" title="Şekil Ekle">
+            <button id="tool-shape-btn" class="tool-btn" title="Add Shape">
               <span class="material-symbols-outlined">shapes</span>
-              <span class="tool-label">Şekil</span>
+              <span class="tool-label">Shape</span>
             </button>
             <!-- Shapes Popup Menu -->
             <div id="shapes-menu" class="floating-popup hidden">
               <button class="shape-opt" data-shape="rect">
-                <span class="material-symbols-outlined">rectangle</span> Dikdörtgen
+                <span class="material-symbols-outlined">rectangle</span> Rectangle
               </button>
               <button class="shape-opt" data-shape="circle">
-                <span class="material-symbols-outlined">circle</span> Daire
+                <span class="material-symbols-outlined">circle</span> Circle
               </button>
               <button class="shape-opt" data-shape="star">
-                <span class="material-symbols-outlined">star</span> Yıldız / Parlama
+                <span class="material-symbols-outlined">star</span> Star / Burst
               </button>
               <button class="shape-opt" data-shape="arrow">
-                <span class="material-symbols-outlined">arrow_forward</span> Ok İşareti
+                <span class="material-symbols-outlined">arrow_forward</span> Arrow
               </button>
               <button class="shape-opt" data-shape="badge">
-                <span class="material-symbols-outlined">local_offer</span> Thumbnail Rozeti
+                <span class="material-symbols-outlined">local_offer</span> Thumbnail Badge
               </button>
             </div>
           </div>
 
-          <button id="tool-draw-btn" class="tool-btn" title="Serbest Çizim">
+          <button id="tool-draw-btn" class="tool-btn" title="Freehand Drawing">
             <span class="material-symbols-outlined">draw</span>
-            <span class="tool-label">Çizim</span>
+            <span class="tool-label">Drawing</span>
           </button>
 
           <div class="divider-v"></div>
 
           <!-- Image upload helper for YouTubers -->
-          <label for="image-upload-input" class="tool-btn" title="Görsel veya Arka Plan Yükle">
+          <label for="image-upload-input" class="tool-btn" title="Upload Image or Background">
             <span class="material-symbols-outlined">add_photo_alternate</span>
-            <span class="tool-label">Görsel</span>
+            <span class="tool-label">Image</span>
             <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
           </label>
 
           <div class="tool-btn-wrapper">
-            <button id="remove-bg-btn" class="tool-btn" title="Seçili görselin arka planını kaldır" disabled>
+            <button id="remove-bg-btn" class="tool-btn" title="Remove the selected image background" disabled>
               <span class="material-symbols-outlined">format_color_fill</span>
-              <span class="tool-label">Arkaplanı Kaldır</span>
+              <span class="tool-label">Remove Background</span>
             </button>
             <div id="remove-bg-menu" class="floating-popup remove-bg-menu hidden">
-              <label class="remove-bg-field">Silinecek renk
+              <label class="remove-bg-field">Color to remove
                 <input id="remove-bg-color" type="color" value="#ffffff">
               </label>
-              <label class="remove-bg-field">Tolerans: <span id="remove-bg-tolerance-value">30</span>
+              <label class="remove-bg-field">Tolerance: <span id="remove-bg-tolerance-value">30</span>
                 <input id="remove-bg-tolerance" type="range" min="0" max="150" value="30">
               </label>
-              <button id="apply-remove-bg" class="remove-bg-apply">Uygula</button>
+              <button id="apply-remove-bg" class="remove-bg-apply">Apply</button>
             </div>
           </div>
         </div>
@@ -326,7 +326,7 @@
       <div class="panel-header">
         <div class="panel-title">
           <span class="material-symbols-outlined">layers</span>
-          <h3>Katmanlar</h3>
+          <h3>Layers</h3>
         </div>
         <span id="layers-count" class="badge-count">0</span>
       </div>
@@ -335,7 +335,7 @@
       <div id="layer-active-controls" class="layer-active-controls hidden">
         <div class="control-row">
           <label class="control-label">
-            <span class="material-symbols-outlined">opacity</span> Opaklık
+            <span class="material-symbols-outlined">opacity</span> Opacity
           </label>
           <div class="slider-box opacity-slider-box">
             <input type="range" id="layer-opacity-slider" min="0" max="100" value="100">
@@ -346,16 +346,16 @@
           </div>
         </div>
         <div class="control-actions">
-          <button id="btn-layer-up" class="action-mini-btn" title="Bir Üste Taşı">
-            <span class="material-symbols-outlined">arrow_upward</span> Üste
+          <button id="btn-layer-up" class="action-mini-btn" title="Move Up">
+            <span class="material-symbols-outlined">arrow_upward</span> Up
           </button>
-          <button id="btn-layer-down" class="action-mini-btn" title="Bir Alta Taşı">
-            <span class="material-symbols-outlined">arrow_downward</span> Alta
+          <button id="btn-layer-down" class="action-mini-btn" title="Move Down">
+            <span class="material-symbols-outlined">arrow_downward</span> Down
           </button>
-          <button id="btn-layer-duplicate" class="action-mini-btn" title="Çoğalt">
+          <button id="btn-layer-duplicate" class="action-mini-btn" title="Duplicate">
             <span class="material-symbols-outlined">content_copy</span>
           </button>
-          <button id="btn-layer-delete" class="action-mini-btn btn-danger" title="Katmanı Sil">
+          <button id="btn-layer-delete" class="action-mini-btn btn-danger" title="Delete Layer">
             <span class="material-symbols-outlined">delete</span>
           </button>
         </div>
@@ -368,8 +368,8 @@
         </div>
         <div id="layers-empty-state" class="layers-empty-state">
           <span class="material-symbols-outlined">dashboard_customize</span>
-          <p>Henüz katman yok</p>
-          <small>Metin, şekil veya çizim ekleyerek başlayın.</small>
+          <p>No layers yet</p>
+          <small>Add text, shapes, or drawings to get started.</small>
         </div>
       </div>
     </aside>

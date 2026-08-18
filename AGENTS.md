@@ -22,7 +22,7 @@ The editor is client-side only. It has no backend and does not persist projects 
 Tedit/
 ├── index.html     # DOM structure, panels, controls, and canvas elements
 ├── style.css      # Dark theme, floating panels, controls, and responsive layout
-├── app.js         # State, rendering, interactions, layer operations, translation, and export
+├── app.js         # State, rendering, interactions, layer operations, and export
 ├── README.md      # Developer-facing project documentation
 ├── AGENTS.md      # This guide
 └── LICENSE        # License text, when present in the checkout
@@ -36,7 +36,7 @@ All application logic is inside one `DOMContentLoaded` callback in `app.js`. Sta
 
 | Area | Approximate location | Responsibility |
 |---|---:|---|
-| State and DOM references | `app.js` 1–125 | Canvas contexts, state, controls, translation helpers |
+| State and DOM references | `app.js` 1–125 | Canvas contexts, state, controls |
 | Initialization and scaling | 126–240 | Startup, responsive canvas sizing, zoom transform |
 | History | 241–310 | Snapshot creation, undo, redo, image restoration |
 | Rendering | 311–636 | Background, layers, live drawing, snap guides |
@@ -179,11 +179,9 @@ When adding a new layer type or tool:
 - Alignment: center snapping exposes horizontal/vertical guides through `state.snapLines`.
 - Export: `mainCanvas.toDataURL()` produces PNG or JPG files named `Tedit_Thumbnail_1280x720.*`.
 
-## Translation behavior
+## UI language
 
-The UI markup is currently authored in Turkish. `translationSets.en` contains the English labels, and `translatePage()` updates text nodes plus `title`, `placeholder`, and `aria-label` attributes. Shape buttons use `data-translation-key`.
-
-`loadLanguage()` currently selects the English set regardless of the optional code argument. If additional languages are introduced, preserve the original-text tracking in `originalText` and `originalAttributes` so repeated translations do not compound replacements.
+The UI is English-only. All user-facing strings live directly in the `index.html` markup and layer names are generated in English in `app.js`. There is no translation layer, so add new labels directly in English.
 
 ## CSS conventions
 
@@ -212,12 +210,11 @@ There is no automated test suite or build pipeline. Validate changes manually in
 4. Upload an image, remove a background, then test undo/redo and export.
 5. Verify center snapping, zoom limits, panning, keyboard movement, and responsive resizing.
 6. Export PNG and JPG and confirm the output dimensions are 1280 × 720.
-7. Switch the UI to English and check text nodes, tooltips, placeholders, and shape labels.
+7. Check text nodes, tooltips, placeholders, and shape labels are all in English.
 
 ## Known limitations
 
 - No project persistence or import/export of editable layer data.
-- Only the English translation set is active; the source markup remains Turkish.
 - History is limited to 30 snapshots and does not include viewport zoom/pan.
 - No multi-selection, grouping, or alignment to arbitrary guides.
 - Touch editing is not a dedicated interaction path.

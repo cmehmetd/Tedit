@@ -78,52 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const removeBgTolerance = document.getElementById('remove-bg-tolerance');
   const removeBgToleranceValue = document.getElementById('remove-bg-tolerance-value');
   const applyRemoveBg = document.getElementById('apply-remove-bg');
-  const translationSets = {
-    en: {"Arka Plan:":"Background:","İndir":"Download","Özellikler":"Properties","Seçim Yok":"No Selection","Katmanlar":"Layers","Metin":"Text","Şekil":"Shape","Çizim":"Drawing","Görsel":"Image","Arkaplanı Kaldır":"Remove Background","Uygula":"Apply","Silinecek renk":"Color to remove","Tolerans:":"Tolerance:","Metin İçeriği":"Text Content","Yazı girin...":"Enter text...","Yazı Tipi (Font)":"Font Family","Yazı Boyutu":"Font Size","Yazı Rengi":"Text Color","Kenarlık":"Stroke","Kenar Kalınlığı":"Stroke Width","Thumbnail Gölge Efekti":"Thumbnail Shadow Effect","Gölge Rengi":"Shadow Color","Dolgu":"Fill","Dolgu Rengi":"Fill Color","Kenarlık Rengi":"Stroke Color","Köşe Yuvarlaklığı":"Corner Radius","Fırça Rengi":"Brush Color","Fırça Kalınlığı":"Brush Size","Çizim Modunu Kapat":"Finish Drawing","Döndürme Açısı":"Rotation Angle","Üste":"Up","Alta":"Down","Geri Al":"Undo","İleri Al":"Redo","Dikdörtgen":"Rectangle","Daire":"Circle","Yıldız / Parlama":"Star / Burst","Ok İşareti":"Arrow","Thumbnail Rozeti":"Thumbnail Badge","Düzenlemek için canvas üzerinden bir metin, şekil veya katman seçin.":"Select text, a shape, or a layer on the canvas to edit it.","Çizim Modu Devrede":"Drawing Mode Active","Opaklık":"Opacity","Bir Üste Taşı":"Move Up","Bir Alta Taşı":"Move Down","Çoğalt":"Duplicate","Katmanı Sil":"Delete Layer","Henüz katman yok":"No layers yet","Metin, şekil veya çizim ekleyerek başlayın.":"Add text, shapes, or drawings to get started.","Canvas Arka Plan Rengi":"Canvas Background Color","Format Seçenekleri":"Format Options","PNG (Yüksek Kalite)":"PNG (High Quality)","JPG (Küçük Boyut)":"JPG (Small File)","Yazı Ekle":"Add Text","Şekil Ekle":"Add Shape","Serbest Çizim":"Freehand Drawing","Görsel veya Arka Plan Yükle":"Upload Image or Background","Seçili görselin arka planını kaldır":"Remove the selected image background","Dil seçin":"Select language","Gizle":"Hide","Göster":"Show","Katmanı":"Layer"}
-  };
-  translationSets.en['Öğe Seçilmedi'] = 'No Item Selected';
-  let translations = translationSets.en;
-  const originalText = new WeakMap();
-  const originalAttributes = new Map();
-
-  function t(key) {
-    return translations[key] || key;
-  }
-
-  function translatePage() {
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach(node => {
-      const original = originalText.get(node) || node.nodeValue.trim();
-      originalText.set(node, original);
-      if (original && translations[original]) {
-        node.nodeValue = node.nodeValue.replace(original, translations[original]);
-      }
-    });
-    document.querySelectorAll('[title], [placeholder], [aria-label]').forEach(el => {
-      ['title', 'placeholder', 'aria-label'].forEach(attr => {
-        if (!el.hasAttribute(attr)) return;
-        const attrKey = `${attr}:${el.id}`;
-        const original = originalAttributes.get(attrKey) || el.getAttribute(attr);
-        originalAttributes.set(attrKey, original);
-        if (translations[original]) {
-          el.setAttribute(attr, translations[original]);
-        }
-      });
-    });
-    document.querySelectorAll('.shape-opt').forEach(btn => {
-      const key = btn.dataset.translationKey;
-      if (key) btn.lastChild.textContent = ` ${t(key)}`;
-    });
-  }
-
-  function loadLanguage(code) {
-    translations = translationSets.en;
-    translatePage();
-    updateUI();
-    render();
-  }
 
   // Top Bar View Elements
   const propBgColor = document.getElementById('prop-bg-color');
@@ -185,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
 
   function init() {
-    loadLanguage();
     setupCanvasScaling();
     window.addEventListener('resize', setupCanvasScaling);
     bindEvents();
@@ -985,8 +938,8 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
     }
 
-    // Görseller yeniden boyutlandırılırken en-boy oranını koru.
-    // Merkez tabanlı katman modelinde konum sabit kalır; yalnızca boyutlar düzeltilir.
+    // Preserve aspect ratio when resizing images.
+    // In the center-based layer model the position stays fixed; only dimensions are adjusted.
     if (layer.type === 'image') {
       const aspectRatio = init.width / init.height;
       const isHorizontalHandle = handle === 'e' || handle === 'w';
@@ -1085,7 +1038,7 @@ document.addEventListener('DOMContentLoaded', () => {
     exitDrawingMode();
     const newLayer = {
       id: generateId(),
-      name: t('Metin') + ' ' + (state.layers.filter(l => l.type === 'text').length + 1),
+      name: 'Text ' + (state.layers.filter(l => l.type === 'text').length + 1),
       type: 'text',
       text: 'TEXT HERE',
       fontFamily: 'Montserrat',
@@ -1113,16 +1066,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function addShapeLayer(shapeType) {
     exitDrawingMode();
     const shapeNames = {
-      rect: t('Dikdörtgen'),
-      circle: t('Daire'),
-      star: t('Yıldız / Parlama'),
-      arrow: t('Ok İşareti'),
-      badge: t('Thumbnail Rozeti')
+      rect: 'Rectangle',
+      circle: 'Circle',
+      star: 'Star / Burst',
+      arrow: 'Arrow',
+      badge: 'Thumbnail Badge'
     };
 
     const newLayer = {
       id: generateId(),
-      name: shapeNames[shapeType] || 'Şekil',
+      name: shapeNames[shapeType] || 'Shape',
       type: 'shape',
       shapeType: shapeType,
       fill: shapeType === 'badge' ? '#FF2B2B' : '#27B3FF',
@@ -1158,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const newLayer = {
       id: generateId(),
-      name: fileName ? (fileName.length > 15 ? fileName.substring(0, 12) + '...' : fileName) : t('Görsel'),
+      name: fileName ? (fileName.length > 15 ? fileName.substring(0, 12) + '...' : fileName) : 'Image',
       type: 'image',
       _imgElement: img,
       x: 640,
@@ -1200,7 +1153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const newLayer = {
         id: generateId(),
-        name: t('Çizim') + ' ' + (state.layers.filter(l => l.type === 'drawing').length + 1),
+        name: 'Drawing ' + (state.layers.filter(l => l.type === 'drawing').length + 1),
         type: 'drawing',
         points: normalizedPoints,
         strokeColor: state.drawingBrush.color,
@@ -1309,7 +1262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     layerActiveControls.classList.add('hidden');
 
     if (state.activeTool === 'drawing') {
-      propTypeBadge.textContent = t('Çizim');
+      propTypeBadge.textContent = 'Drawing';
       drawProps.classList.remove('hidden');
     } else if (activeLayer) {
       layerActiveControls.classList.remove('hidden');
@@ -1324,7 +1277,7 @@ document.addEventListener('DOMContentLoaded', () => {
       layerOpacityNum.value = op;
 
       if (activeLayer.type === 'text') {
-        propTypeBadge.textContent = t('Metin');
+        propTypeBadge.textContent = 'Text';
         textProps.classList.remove('hidden');
         propTextContent.value = activeLayer.text;
         propFontFamily.value = activeLayer.fontFamily;
@@ -1340,7 +1293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         propShadowColor.value = activeLayer.shadowColor || '#000000';
         shadowColorHex.textContent = propShadowColor.value.toUpperCase();
       } else if (activeLayer.type === 'shape') {
-        propTypeBadge.textContent = t('Şekil');
+        propTypeBadge.textContent = 'Shape';
         shapeProps.classList.remove('hidden');
         
         const isFillEnabled = activeLayer.fillEnabled !== false;
@@ -1359,12 +1312,12 @@ document.addEventListener('DOMContentLoaded', () => {
         propShapeRadius.value = activeLayer.radius || 0;
         propShapeRadiusNum.value = activeLayer.radius || 0;
       } else if (activeLayer.type === 'image') {
-        propTypeBadge.textContent = t('Görsel');
+        propTypeBadge.textContent = 'Image';
       } else if (activeLayer.type === 'drawing') {
-        propTypeBadge.textContent = `${t('Çizim')} ${t('Katmanı')}`;
+        propTypeBadge.textContent = 'Drawing Layer';
       }
     } else {
-      propTypeBadge.textContent = t('Seçim Yok');
+      propTypeBadge.textContent = 'No Selection';
       noSelectionHint.classList.remove('hidden');
     }
   }
@@ -1396,10 +1349,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render layers in reverse order (top layer is on top of the list)
     [...state.layers].reverse().forEach(layer => {
-      let displayName = layer.name;
-      if (/^Yazı \d+$/.test(layer.name)) displayName = `${t('Metin')} ${layer.name.match(/\d+$/)[0]}`;
-      if (/^Çizim \d+$/.test(layer.name)) displayName = `${t('Çizim')} ${layer.name.match(/\d+$/)[0]}`;
-      if (layer.name === 'Görsel') displayName = t('Görsel');
+      const displayName = layer.name;
       const item = document.createElement('div');
       item.className = `layer-item ${state.selectedLayerIds.includes(layer.id) ? 'active' : ''}`;
       item.setAttribute('draggable', 'true');
@@ -1418,10 +1368,10 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="layer-info">
           <span class="layer-name">${escapeHtml(displayName)}</span>
-          <span class="layer-sub">${Math.round((layer.opacity !== undefined ? layer.opacity : 1) * 100)}% ${t('Opaklık')}</span>
+          <span class="layer-sub">${Math.round((layer.opacity !== undefined ? layer.opacity : 1) * 100)}% Opacity</span>
         </div>
         <div class="layer-quick-tools">
-          <button class="layer-tool-icon btn-vis" title="${layer.visible ? t('Gizle') : t('Göster')}">
+          <button class="layer-tool-icon btn-vis" title="${layer.visible ? 'Hide' : 'Show'}">
             <span class="material-symbols-outlined">${layer.visible ? 'visibility' : 'visibility_off'}</span>
           </button>
         </div>

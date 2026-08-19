@@ -156,6 +156,38 @@ body {
   padding: 5px 12px;
 }
 
+.orientation-panel {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 3px;
+  padding: 5px 10px;
+}
+
+.orientation-btn {
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.orientation-btn:hover,
+.orientation-btn.active {
+  color: var(--text-primary);
+  background: var(--accent-color);
+}
+
+.orientation-separator {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
 .zoom-btn {
   background: transparent;
   border: none;

@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const propBgColor = document.getElementById('prop-bg-color');
   const btnZoomReset = document.getElementById('btn-zoom-reset');
   const zoomVal = document.getElementById('zoom-val');
+  const orientationButtons = document.querySelectorAll('.orientation-btn');
 
   // Left Properties Panel Elements
   const propTypeBadge = document.getElementById('prop-type-badge');
@@ -178,6 +179,29 @@ document.addEventListener('DOMContentLoaded', () => {
     applyCanvasTransform();
   }
 
+  function setCanvasOrientation(orientation, recordHistory = true) {
+    const isPortrait = orientation === 'portrait';
+    const nextWidth = isPortrait ? 1080 : 1280;
+    const nextHeight = isPortrait ? 1920 : 720;
+
+    if (state.canvasWidth === nextWidth && state.canvasHeight === nextHeight) return;
+    if (recordHistory) saveHistoryState();
+
+    state.canvasWidth = nextWidth;
+    state.canvasHeight = nextHeight;
+    mainCanvas.width = nextWidth;
+    mainCanvas.height = nextHeight;
+    interactiveCanvas.width = nextWidth;
+    interactiveCanvas.height = nextHeight;
+    orientationButtons.forEach(button => {
+      button.classList.toggle('active', button.dataset.orientation === orientation);
+    });
+    setupCanvasScaling();
+    render();
+    updateUI();
+    if (recordHistory) saveHistoryState();
+  }
+
   function applyCanvasTransform() {
     canvasWrapper.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.userZoom})`;
   }
@@ -197,6 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function saveHistoryState() {
     const snapshot = {
+      canvasWidth: state.canvasWidth,
+      canvasHeight: state.canvasHeight,
       backgroundColor: state.backgroundColor,
       layers: JSON.parse(JSON.stringify(state.layers.map(l => {
         if (l.type === 'image' && l._imgElement) {
@@ -234,6 +260,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function restoreState(snapshot) {
+    state.canvasWidth = snapshot.canvasWidth || 1280;
+    state.canvasHeight = snapshot.canvasHeight || 720;
+    mainCanvas.width = state.canvasWidth;
+    mainCanvas.height = state.canvasHeight;
+    interactiveCanvas.width = state.canvasWidth;
+    interactiveCanvas.height = state.canvasHeight;
+    const orientation = state.canvasWidth < state.canvasHeight ? 'portrait' : 'landscape';
+    orientationButtons.forEach(button => {
+      button.classList.toggle('active', button.dataset.orientation === orientation);
+    });
     state.backgroundColor = snapshot.backgroundColor;
     propBgColor.value = state.backgroundColor;
     
@@ -251,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     updateHistoryButtons();
+    setupCanvasScaling();
     render();
     updateUI();
   }
@@ -1451,7 +1488,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const dataUrl = mainCanvas.toDataURL(format, 0.95);
     const link = document.createElement('a');
-    link.download = `Tedit_Thumbnail_1280x720.${extension}`;
+    link.download = `Tedit_Thumbnail_${state.canvasWidth}x${state.canvasHeight}.${extension}`;
     link.href = dataUrl;
     link.click();
 
@@ -1463,6 +1500,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
 
   function bindEvents() {
+    orientationButtons.forEach(button => {
+      button.addEventListener('click', () => setCanvasOrientation(button.dataset.orientation));
+    });
+
     // Ctrl + Mouse Wheel Zoom (Canvas Zooming)
     canvasViewport.addEventListener('wheel', (e) => {
       if (e.ctrlKey || e.metaKey) {

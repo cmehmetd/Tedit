@@ -10,6 +10,9 @@ Live demo: [cmehmetd.github.io/Tedit](https://cmehmetd.github.io/Tedit/)
 
 ## Features
 
+- Canvas orientation control with landscape (1280 x 720) and portrait (1080 x 1920) modes; landscape is the default.
+- Export filenames include the active canvas dimensions, for example `Tedit_Thumbnail_1080x1920.png`.
+
 - Text layers with selectable fonts, size, color, stroke, and shadow.
 - Rectangle, circle, starburst, arrow, and badge shape layers.
 - Freehand drawing with configurable brush color and size.
@@ -128,6 +131,8 @@ Keep canvas dimensions configurable through `state.canvasWidth` and `state.canva
 | `Ctrl/Cmd + Click` | Add or remove a layer from the multi-selection |
 
 ## Development notes
+
+- Orientation changes are included in undo/redo history and update both canvas bitmap dimensions.
 
 - There are currently no automated tests or runtime dependencies.
 - Use the browser console and manual interaction flows when validating changes.

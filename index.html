@@ -37,7 +37,14 @@
         </div>
       </div>
 
-      <!-- Panel 3: Actions (Undo / Redo & Seamless Download Combined) -->
+      <!-- Panel 3: Canvas Orientation -->
+      <div class="floating-panel orientation-panel" role="group" aria-label="Canvas orientation">
+        <button id="btn-orientation-landscape" class="orientation-btn active" type="button" data-orientation="landscape">Yatay</button>
+        <span class="orientation-separator">|</span>
+        <button id="btn-orientation-portrait" class="orientation-btn" type="button" data-orientation="portrait">Dikey</button>
+      </div>
+
+      <!-- Panel 4: Actions (Undo / Redo & Seamless Download Combined) -->
       <div class="floating-panel actions-panel">
         <button id="btn-undo" class="icon-btn" title="Undo (Ctrl+Z)">
           <span class="material-symbols-outlined">undo</span>

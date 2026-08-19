@@ -170,6 +170,9 @@ When adding a new layer type or tool:
 
 ## Current tools and behaviors
 
+- Canvas orientation: the top-center `Yatay | Dikey` control defaults to landscape and switches between 1280 x 720 and 1080 x 1920.
+- Export filenames use the active canvas dimensions, such as `Tedit_Thumbnail_1080x1920.png` in portrait mode.
+
 - Text: font family, 16–250 px size, fill, stroke, stroke width, and shadow.
 - Shapes: rectangle, circle, star/burst, arrow, and badge; fill toggle, fill/stroke colors, stroke width, and radius.
 - Drawing: continuous freehand mode with brush size 2–60 px; finish with the drawing control or `Escape`.
@@ -201,6 +204,8 @@ Visual constants should use the custom properties in `:root` in `style.css`, inc
 | `Escape` | Exit drawing mode or clear selection |
 
 ## Validation
+
+The orientation control and dimension-based export filename must be tested in both modes.
 
 There is no automated test suite or build pipeline. Validate changes manually in a modern browser:
 
